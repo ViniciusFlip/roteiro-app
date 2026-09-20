@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boat Scroll Experience</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  html, body { margin:0; padding:0; background:#062f3b; }
+  body { overflow-x:hidden; font-family: Inter, system-ui, sans-serif; }
+
+  #scene {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #08aebc;
+  }
+
+  #sea {
+    position:absolute;
+    inset:-5%;
+    width:110%;
+    height:110%;
+    object-fit:cover;
+    will-change:transform;
+    transform:scale(1.04);
+  }
+
+  /* Soft ocean depth overlay */
+  #waterTint {
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(0,235,238,.08), transparent 42%),
+      linear-gradient(180deg, rgba(0,70,85,.04), rgba(0,50,65,.10));
+    pointer-events:none;
+  }
+
+  #route {
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:.0;
+    transition:opacity .4s;
+  }
+
+  #boat {
+    position:absolute;
+    width:110px;
+    height:260px;
+    left:0;
+    top:0;
+    transform-origin:50% 50%;
+    will-change:transform;
+    filter: drop-shadow(22px 34px 16px rgba(0,31,54,.32));
+  }
+
+  #boatShadow {
+    position:absolute;
+    width:76px;
+    height:210px;
+    border-radius:50%;
+    background:rgba(0,38,70,.28);
+    filter:blur(17px);
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+    opacity:.85;
+  }
+
+  .boat-hull {
+    position:absolute;
+    inset:0;
+  }
+
+  .wake {
+    position:absolute;
+    width:160px;
+    height:42px;
+    left:50%;
+    bottom:-22px;
+    transform:translateX(-50%);
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);
+    filter:blur(7px);
+    border-radius:50%;
+    opacity:.5;
+  }
+
+  #progress {
+    position:fixed;
+    left:0;
+    top:0;
+    width:100%;
+    height:3px;
+    transform-origin:left;
+    transform:scaleX(0);
+    background:rgba(255,255,255,.9);
+    z-index:20;
+  }
+
+  .hint {
+    position:fixed;
+    left:50%;
+    bottom:28px;
+    transform:translateX(-50%);
+    color:white;
+    background:rgba(0,35,45,.34);
+    border:1px solid rgba(255,255,255,.24);
+    backdrop-filter:blur(12px);
+    padding:10px 15px;
+    border-radius:999px;
+    font-size:12px;
+    letter-spacing:.04em;
+    z-index:10;
+    transition:opacity .5s;
+  }
+
+  .marker {
+    position:absolute;
+    width:8px;height:8px;border-radius:50%;
+    background:white;
+    box-shadow:0 0 0 5px rgba(255,255,255,.15), 0 0 22px rgba(255,255,255,.6);
+  }
+
+  #content {
+    position:relative;
+    height:500vh;
+    z-index:1;
+    pointer-events:none;
+  }
+
+  .label {
+    position:fixed;
+    top:28px;
+    left:28px;
+    color:white;
+    z-index:10;
+    text-shadow:0 2px 15px rgba(0,0,0,.25);
+  }
+  .label small { opacity:.72; letter-spacing:.18em; text-transform:uppercase; font-size:10px; }
+  .label h1 { margin:4px 0 0; font-size:clamp(22px,4vw,42px); font-weight:600; }
+
+  @media (max-width:640px){
+    #boat { width:76px; height:180px; }
+    #boat svg { width:76px; height:180px; }
+    .label { left:18px; top:18px; }
+    .hint { bottom:18px; }
+  }
+</style>
+</head>
+
+<body>
+
+<div id="scene">
+  <img id="sea" src="sea.jpg" alt="">
+  <div id="waterTint"></div>
+
+  <div id="boatShadow"></div>
+
+  <div id="boat" aria-hidden="true">
+    <svg class="boat-hull" viewBox="0 0 110 260" xmlns="http://www.w3.org/2000/svg">
+      <!-- top-down motor yacht -->
+      <defs>
+        <linearGradient id="hull" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ffffff"/>
+          <stop offset=".7" stop-color="#eef4f6"/>
+          <stop offset="1" stop-color="#cbd7dc"/>
+        </linearGradient>
+        <linearGradient id="deck" x1="0" y1="0" x2="0" y2="1">
+          <stop stop-color="#ffffff"/>
+          <stop offset="1" stop-color="#dce7eb"/>
+        </linearGradient>
+      </defs>
+
+      <path d="M55 4 C34 20 17 55 16 105 L16 212 C16 236 29 251 55 257
+               C81 251 94 236 94 212 L94 105 C93 55 76 20 55 4Z"
+            fill="url(#hull)" stroke="#aebfc5" stroke-width="2"/>
+
+      <path d="M55 17 C42 30 29 57 28 100 L28 196
+               C28 211 38 220 55 224 C72 220 82 211 82 196 L82 100
+               C81 57 68 30 55 17Z"
+            fill="url(#deck)" stroke="#c2d0d5"/>
+
+      <!-- windshield -->
+      <path d="M32 72 Q55 60 78 72 L76 92 Q55 83 34 92Z"
+            fill="#172c39"/>
+      <path d="M35 73 Q55 66 75 73 L74 80 Q55 75 36 80Z"
+            fill="#6c8b98" opacity=".75"/>
+
+      <!-- cabin -->
+      <rect x="32" y="99" width="46" height="48" rx="7" fill="#f8fbfc" stroke="#c4d1d5"/>
+      <rect x="37" y="105" width="36" height="19" rx="4" fill="#a9bdc5"/>
+      <rect x="39" y="107" width="32" height="15" rx="3" fill="#274654"/>
+      <rect x="37" y="128" width="36" height="13" rx="4" fill="#eef3f5"/>
+
+      <!-- rear deck -->
+      <rect x="29" y="151" width="52" height="51" rx="8" fill="#edf3f5" stroke="#bdcbd0"/>
+      <rect x="36" y="158" width="38" height="27" rx="5" fill="#6e8088"/>
+      <rect x="39" y="161" width="32" height="20" rx="4" fill="#1f3038"/>
+
+      <!-- swim platform -->
+      <path d="M25 204 L85 204 L78 238 Q55 247 32 238Z"
+            fill="#b7c7cc" stroke="#879ba2"/>
+      <rect x="37" y="210" width="36" height="17" rx="3" fill="#dbe5e8"/>
+
+      <!-- bow details -->
+      <circle cx="55" cy="25" r="3" fill="#87979d"/>
+      <path d="M55 7 L55 29" stroke="#8b9ba1" stroke-width="2"/>
+      <path d="M46 38 L64 38" stroke="#c2ced2" stroke-width="2"/>
+
+      <!-- side rails -->
+      <path d="M18 103 Q15 154 22 204" fill="none" stroke="#81939a" stroke-width="2"/>
+      <path d="M92 103 Q95 154 88 204" fill="none" stroke="#81939a" stroke-width="2"/>
+    </svg>
+    <div class="wake"></div>
+  </div>
+</div>
+
+<div id="progress"></div>
+<div class="label">
+  <small>Experiência náutica</small>
+  <h1>Explore pelo mar</h1>
+</div>
+
+<div class="hint" id="hint">
+  <span>Role para navegar</span>
+</div>
+
+<main id="content"></main>
+
+<script>
+const boat = document.getElementById('boat');
+const shadow = document.getElementById('boatShadow');
+const sea = document.getElementById('sea');
+const progress = document.getElementById('progress');
+const hint = document.getElementById('hint');
+
+let current = 0;
+let target = 0;
+
+function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+function ease(v){ return v < .5 ? 4*v*v*v : 1-Math.pow(-2*v+2,3)/2; }
+
+// Bezier route: bottom-center -> left-middle -> upper-center -> right side
+const P0 = {x:.52,y:.84};
+const P1 = {x:.49,y:.70};
+const P2 = {x:.35,y:.61};
+const P3 = {x:.25,y:.49};
+
+const Q0 = {x:.25,y:.49};
+const Q1 = {x:.17,y:.37};
+const Q2 = {x:.45,y:.29};
+const Q3 = {x:.57,y:.20};
+
+const R0 = {x:.57,y:.20};
+const R1 = {x:.66,y:.12};
+const R2 = {x:.80,y:.22};
+const R3 = {x:.76,y:.06};
+
+function bezier(t,a,b,c,d){
+  const u=1-t;
+  return {
+    x:u*u*u*a.x+3*u*u*t*b.x+3*u*t*t*c.x+t*t*t*d.x,
+    y:u*u*u*a.y+3*u*u*t*b.y+3*u*t*t*c.y+t*t*t*d.y
+  };
+}
+
+function route(t){
+  if(t <= .34) return bezier(t/.34,P0,P1,P2,P3);
+  if(t <= .70) return bezier((t-.34)/.36,Q0,Q1,Q2,Q3);
+  return bezier((t-.70)/.30,R0,R1,R2,R3);
+}
+
+function routeAngle(t){
+  const a = route(clamp(t-.002,0,1));
+  const b = route(clamp(t+.002,0,1));
+  return Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI + 90;
+}
+
+function update(){
+  const max = document.documentElement.scrollHeight - innerHeight;
+  target = max > 0 ? scrollY/max : 0;
+  target = clamp(target,0,1);
+}
+
+function animate(){
+  current += (target-current)*0.085;
+
+  const p = route(current);
+  const angle = routeAngle(current);
+
+  const bw = boat.getBoundingClientRect().width;
+  const bh = boat.getBoundingClientRect().height;
+
+  const x = p.x*innerWidth;
+  const y = p.y*innerHeight;
+
+  boat.style.transform =
+    `translate3d(${x-bw/2}px, ${y-bh/2}px, 0) rotate(${angle}deg)`;
+
+  shadow.style.left = `${x + innerWidth*.018}px`;
+  shadow.style.top = `${y + innerHeight*.115}px`;
+  shadow.style.transform = `translate(-50%,-50%) rotate(${angle-8}deg)`;
+
+  sea.style.transform =
+    `translate3d(${(current-.5)*-22}px, ${(current-.5)*-14}px, 0) scale(1.04)`;
+
+  progress.style.transform = `scaleX(${current})`;
+
+  if(current > .025) hint.style.opacity = '0';
+  else hint.style.opacity = '1';
+
+  requestAnimationFrame(animate);
+}
+
+addEventListener('scroll', update, {passive:true});
+addEventListener('resize', update);
+update();
+animate();
+</script>
+
+</body>
+</html>
