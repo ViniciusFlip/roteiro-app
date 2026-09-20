@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Travel — Hotel Booking</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+          },
+          colors: {
+            ink: '#101114',
+            lime: '#D9F43A',
+            mist: '#F3F4F1',
+            line: '#E7E8E4'
+          },
+          boxShadow: {
+            soft: '0 18px 50px rgba(17, 18, 20, .10)',
+            card: '0 8px 28px rgba(17, 18, 20, .08)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: #e9e9e7;
+      color: #101114;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    }
+
+    .app-shell {
+      min-height: 100dvh;
+      background:
+        radial-gradient(circle at 80% 0%, rgba(215,244,58,.13), transparent 28%),
+        #f8f8f6;
+    }
+
+    .screen {
+      display: none;
+      animation: screenIn .28s ease both;
+    }
+
+    .screen.active { display: block; }
+
+    @keyframes screenIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-art {
+      background:
+        linear-gradient(180deg, rgba(5,15,22,.02), rgba(5,15,22,.35)),
+        url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85')
+        center/cover;
+    }
+
+    .mountain-art {
+      background:
+        linear-gradient(180deg, rgba(8,31,42,.02), rgba(8,31,42,.20)),
+        url('https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1200&q=85')
+        center/cover;
+    }
+
+    .hotel-art {
+      background:
+        linear-gradient(180deg, rgba(5,18,24,.03), rgba(5,18,24,.18)),
+        url('https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1200&q=85')
+        center/cover;
+    }
+
+    .mini-art {
+      background:
+        url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80')
+        center/cover;
+    }
+
+    .glass {
+      background: rgba(255,255,255,.86);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .phone-preview {
+      width: min(100%, 430px);
+      min-height: 820px;
+      border-radius: 42px;
+      border: 8px solid #161719;
+      overflow: hidden;
+      box-shadow: 0 28px 80px rgba(0,0,0,.20);
+      background: #f8f8f6;
+    }
+
+    .safe-bottom { padding-bottom: max(96px, env(safe-area-inset-bottom)); }
+
+    @media (min-width: 768px) {
+      .desktop-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 32px;
+        max-width: 980px;
+        margin: 0 auto;
+        align-items: start;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .desktop-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .phone-preview { width: 360px; min-height: 760px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="min-h-screen flex justify-center">
+    <div class="w-full max-w-[1440px]">
+
+      <!-- Desktop presentation / mobile app -->
+      <section class="px-4 py-5 md:px-8 md:py-10">
+
+        <div class="flex items-center justify-between max-w-[980px] mx-auto mb-6 md:mb-10">
+          <div>
+            <p class="text-[10px] uppercase tracking-[.24em] font-bold text-gray-400">Design System</p>
+            <h1 class="text-xl md:text-2xl font-semibold tracking-tight">Smart Travel</h1>
+          </div>
+
+          <div class="hidden md:flex items-center gap-2 text-xs font-medium text-gray-500">
+            <span class="px-3 py-1.5 rounded-full bg-white border border-line">Mobile First</span>
+            <span class="px-3 py-1.5 rounded-full bg-white border border-line">Tailwind</span>
+            <span class="px-3 py-1.5 rounded-full bg-white border border-line">Lucide</span>
+          </div>
+        </div>
+
+        <div class="desktop-grid">
+
+          <!-- SCREEN 1 -->
+          <section class="phone-preview relative">
+            <div class="h-7 px-5 flex items-center justify-between text-[10px] font-semibold bg-white">
+              <span>11:30</span>
+              <span class="w-20 h-5 bg-black rounded-full"></span>
+              <span class="flex items-center gap-1"><i data-lucide="wifi" class="w-3 h-3"></i><i data-lucide="battery-full" class="w-3 h-3"></i></span>
+            </div>
+
+            <div id="welcomeScreen" class="screen active h-full">
+              <div class="relative h-[790px] overflow-hidden">
+                <div class="absolute inset-x-0 top-0 h-[420px] mountain-art"></div>
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#f8f8f6]"></div>
+
+                <div class="relative z-10 px-5 pt-9">
+                  <div class="max-w-[250px]">
+                    <h2 class="text-[34px] leading-[.98] font-medium tracking-[-.055em]">
+                      Smart<br/>Travel <span class="bg-lime px-1 rounded-sm">Hotel</span><br/>Booking
+                    </h2>
+                    <p class="mt-5 text-[11px] leading-relaxed text-gray-600 max-w-[230px]">
+                      Discover amazing places and book your perfect stay.
+                    </p>
+                  </div>
+
+                  <div class="flex gap-2 mt-7 overflow-x-auto no-scrollbar">
+                    <button class="shrink-0 px-3 py-2 rounded-full bg-white/85 border border-white text-[10px] font-semibold flex items-center gap-1.5">
+                      <i data-lucide="plane" class="w-3.5 h-3.5 text-sky-500"></i> Flights
+                    </button>
+                    <button class="shrink-0 px-3 py-2 rounded-full bg-white/85 border border-white text-[10px] font-semibold flex items-center gap-1.5">
+                      <i data-lucide="hotel" class="w-3.5 h-3.5 text-violet-500"></i> Hotels
+                    </button>
+                    <button class="shrink-0 px-3 py-2 rounded-full bg-white/85 border border-white text-[10px] font-semibold flex items-center gap-1.5">
+                      <i data-lucide="compass" class="w-3.5 h-3.5 text-orange-500"></i> Experiences
+                    </button>
+                  </div>
+                </div>
+
+                <div class="absolute left-4 right-4 bottom-7 z-20">
+                  <div class="bg-white/90 backdrop-blur-xl rounded-[28px] p-2 shadow-soft border border-white">
+                    <div class="hotel-art h-44 rounded-[22px]"></div>
+
+                    <div class="px-3 pt-3 pb-2 flex items-start justify-between">
+                      <div>
+                        <div class="flex items-center gap-1 text-[10px] font-semibold">
+                          <span class="text-amber-500">★</span> 4.8
+                        </div>
+                        <p class="text-xs font-semibold mt-1">Bali Exotica</p>
+                        <p class="text-[9px] text-gray-500">Indonesia</p>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-base font-bold">$220</p>
+                        <p class="text-[8px] text-gray-400">per night</p>
+                      </div>
+                    </div>
+
+                    <button onclick="go('home')" class="w-full h-12 rounded-[18px] bg-black text-white text-[11px] font-semibold flex items-center justify-center gap-2">
+                      <span class="w-7 h-7 rounded-full bg-lime text-black grid place-items-center"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i></span>
+                      Get Started
+                      <i data-lucide="chevrons-right" class="w-4 h-4 ml-auto mr-3"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Screen 2 -->
+            <div id="homeScreen" class="screen">
+              <div class="px-4 pt-3 pb-24">
+                <header class="flex items-center justify-between pt-2">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-full bg-gray-200 overflow-hidden">
+                      <img src="https://i.pravatar.cc/100?img=12" alt="" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                      <p class="text-[9px] text-gray-400">Hello, Albert</p>
+                      <p class="text-[8px] text-gray-400">Let's choose a new place</p>
+                    </div>
+                  </div>
+                  <div class="flex gap-1">
+                    <button class="w-9 h-9 rounded-full bg-white border border-line grid place-items-center"><i data-lucide="search" class="w-4 h-4"></i></button>
+                    <button class="w-9 h-9 rounded-full bg-white border border-line grid place-items-center"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i></button>
+                  </div>
+                </header>
+
+                <h2 class="text-[31px] leading-[1.02] font-medium tracking-[-.055em] mt-7">
+                  Find The<br/><span class="font-semibold">Perfect Place</span>
+                </h2>
+
+                <div class="flex gap-2 mt-5 overflow-x-auto no-scrollbar">
+                  <button class="px-3 py-2 rounded-full bg-black text-white text-[10px] flex items-center gap-1.5 shrink-0"><i data-lucide="hotel" class="w-3 h-3"></i> Hotels</button>
+                  <button class="px-3 py-2 rounded-full bg-white border border-line text-[10px] flex items-center gap-1.5 shrink-0"><i data-lucide="plane" class="w-3 h-3"></i> Flights</button>
+                  <button class="px-3 py-2 rounded-full bg-white border border-line text-[10px] flex items-center gap-1.5 shrink-0"><i data-lucide="car-front" class="w-3 h-3"></i> Rental Car</button>
+                </div>
+
+                <div class="flex items-center justify-between mt-6 mb-3">
+                  <h3 class="text-xs font-semibold">Recommended</h3>
+                  <button class="text-[9px] text-gray-400">See all</button>
+                </div>
+
+                <button onclick="go('detail')" class="block w-full text-left bg-white rounded-[25px] p-2 shadow-card border border-line">
+                  <div class="relative">
+                    <div class="hotel-art h-40 rounded-[19px]"></div>
+                    <span class="absolute top-3 left-3 bg-white rounded-full px-2.5 py-1 text-[9px] font-semibold"><span class="text-amber-500">★</span> 4.8</span>
+                    <span class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 grid place-items-center"><i data-lucide="heart" class="w-4 h-4"></i></span>
+                  </div>
+
+                  <div class="px-2.5 py-2.5 flex items-center justify-between">
+                    <div>
+                      <p class="text-[11px] font-semibold">Bali Exotica</p>
+                      <p class="text-[9px] text-gray-400 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> Indonesia</p>
+                    </div>
+                    <p class="font-bold text-sm">$220</p>
+                  </div>
+                </button>
+
+                <div class="flex items-center justify-between mt-5 mb-3">
+                  <h3 class="text-xs font-semibold">Flash Deals</h3>
+                  <div class="flex gap-1">
+                    <span class="w-5 h-5 rounded bg-red-100 text-red-500 grid place-items-center text-[7px] font-bold">02</span>
+                    <span class="w-5 h-5 rounded bg-red-100 text-red-500 grid place-items-center text-[7px] font-bold">45</span>
+                    <span class="w-5 h-5 rounded bg-red-100 text-red-500 grid place-items-center text-[7px] font-bold">12</span>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div class="bg-white rounded-[20px] p-2 border border-line">
+                    <div class="mini-art h-20 rounded-[15px]"></div>
+                    <p class="text-[9px] font-semibold mt-2">Mountain Escape</p>
+                    <p class="text-[8px] text-gray-400">$180 / night</p>
+                  </div>
+                  <div class="bg-white rounded-[20px] p-2 border border-line">
+                    <div class="hero-art h-20 rounded-[15px]"></div>
+                    <p class="text-[9px] font-semibold mt-2">Island Retreat</p>
+                    <p class="text-[8px] text-gray-400">$195 / night</p>
+                  </div>
+                </div>
+              </div>
+
+              <nav class="absolute bottom-0 left-0 right-0 h-[76px] bg-black text-white rounded-t-[28px] px-6 flex items-center justify-between">
+                <button onclick="go('home')" class="w-11 h-11 rounded-full bg-lime text-black grid place-items-center"><i data-lucide="home" class="w-4 h-4"></i></button>
+                <button class="text-gray-400"><i data-lucide="search" class="w-5 h-5"></i></button>
+                <button class="text-gray-400"><i data-lucide="heart" class="w-5 h-5"></i></button>
+                <button class="text-gray-400"><i data-lucide="user-round" class="w-5 h-5"></i></button>
+              </nav>
+            </div>
+
+            <!-- Screen 3 -->
+            <div id="detailScreen" class="screen">
+              <div class="pb-24">
+                <div class="relative h-[360px] hero-art">
+                  <div class="absolute top-3 left-3 right-3 flex justify-between">
+                    <button onclick="go('home')" class="w-9 h-9 rounded-full bg-white/80 backdrop-blur grid place-items-center"><i data-lucide="arrow-left" class="w-4 h-4"></i></button>
+                    <button class="w-9 h-9 rounded-full bg-white/80 backdrop-blur grid place-items-center"><i data-lucide="heart" class="w-4 h-4"></i></button>
+                  </div>
+                  <div class="absolute left-5 right-5 bottom-6 text-white">
+                    <p class="text-[9px] uppercase tracking-[.18em] opacity-80">Indonesia</p>
+                    <h2 class="text-3xl font-medium tracking-tight">Bali Exotica</h2>
+                    <div class="flex items-center gap-2 mt-1 text-[9px]">
+                      <span>★★★★★</span><span>4.8</span><span>2k reviews</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-[#f8f8f6] -mt-5 relative rounded-t-[30px] px-4 pt-5">
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold">Facilities</h3>
+                    <button class="text-[9px] text-gray-400">See all</button>
+                  </div>
+
+                  <div class="flex gap-2 overflow-x-auto no-scrollbar">
+                    <span class="px-3 py-2 rounded-full bg-white border border-line text-[9px] flex gap-1.5 items-center"><i data-lucide="wifi" class="w-3 h-3"></i> WiFi</span>
+                    <span class="px-3 py-2 rounded-full bg-white border border-line text-[9px] flex gap-1.5 items-center"><i data-lucide="utensils" class="w-3 h-3"></i> Food</span>
+                    <span class="px-3 py-2 rounded-full bg-white border border-line text-[9px] flex gap-1.5 items-center"><i data-lucide="bed-double" class="w-3 h-3"></i> Room</span>
+                  </div>
+
+                  <h3 class="text-sm font-semibold mt-7 mb-2">Description</h3>
+                  <p class="text-[10px] leading-relaxed text-gray-500">
+                    Bali Exotica is a private luxury island in Indonesia, known for its tranquil atmosphere, ideal for a relaxing escape.
+                    <span class="font-semibold text-black">Read more...</span>
+                  </p>
+
+                  <div class="grid grid-cols-3 gap-2 mt-4">
+                    <div class="hero-art h-16 rounded-[12px]"></div>
+                    <div class="hotel-art h-16 rounded-[12px]"></div>
+                    <div class="mini-art h-16 rounded-[12px]"></div>
+                  </div>
+
+                  <div class="mt-6 bg-white rounded-[22px] p-3 flex items-center justify-between shadow-card border border-line">
+                    <div>
+                      <p class="text-[8px] text-gray-400">Total Cost</p>
+                      <p class="text-base font-bold">$100<span class="text-[8px] font-normal text-gray-400"> / per day</span></p>
+                    </div>
+                    <button class="px-5 h-11 rounded-full bg-lime text-[10px] font-bold">Reserve Your Spot</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tiny mode controls only for the prototype -->
+            <div class="absolute top-1/2 -right-1 translate-x-full hidden xl:flex flex-col gap-2">
+              <button onclick="go('welcome')" class="bg-white border border-line rounded-xl px-3 py-2 text-[10px]">Welcome</button>
+              <button onclick="go('home')" class="bg-white border border-line rounded-xl px-3 py-2 text-[10px]">Home</button>
+              <button onclick="go('detail')" class="bg-white border border-line rounded-xl px-3 py-2 text-[10px]">Detail</button>
+            </div>
+          </section>
+
+          <!-- DESIGN SYSTEM -->
+          <aside class="hidden md:block md:col-span-1">
+            <div class="bg-white rounded-[30px] border border-line p-6 shadow-card sticky top-8">
+              <p class="text-[10px] uppercase tracking-[.2em] text-gray-400 font-bold">Captured system</p>
+              <h2 class="text-2xl font-semibold tracking-tight mt-2">Visual Language</h2>
+
+              <div class="mt-7">
+                <p class="text-xs font-semibold mb-3">Colors</p>
+                <div class="grid grid-cols-2 gap-2">
+                  <div><div class="h-14 rounded-2xl bg-[#D9F43A]"></div><p class="text-[9px] mt-1.5 text-gray-500">Lime / CTA</p></div>
+                  <div><div class="h-14 rounded-2xl bg-[#101114]"></div><p class="text-[9px] mt-1.5 text-gray-500">Ink / Navigation</p></div>
+                  <div><div class="h-14 rounded-2xl bg-[#F8F8F6] border"></div><p class="text-[9px] mt-1.5 text-gray-500">Warm Background</p></div>
+                  <div><div class="h-14 rounded-2xl bg-[#FFFFFF] border"></div><p class="text-[9px] mt-1.5 text-gray-500">Surface</p></div>
+                </div>
+              </div>
+
+              <div class="mt-7">
+                <p class="text-xs font-semibold mb-3">UI principles</p>
+                <div class="space-y-2">
+                  <div class="p-3 rounded-2xl bg-[#F8F8F6] text-[10px]">Large editorial headlines</div>
+                  <div class="p-3 rounded-2xl bg-[#F8F8F6] text-[10px]">Very rounded cards / pills</div>
+                  <div class="p-3 rounded-2xl bg-[#F8F8F6] text-[10px]">Photography drives emotion</div>
+                  <div class="p-3 rounded-2xl bg-[#F8F8F6] text-[10px]">Black navigation + lime action</div>
+                  <div class="p-3 rounded-2xl bg-[#F8F8F6] text-[10px]">Thin borders + soft shadows</div>
+                </div>
+              </div>
+
+              <div class="mt-7">
+                <p class="text-xs font-semibold mb-3">Components</p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="px-3 py-2 rounded-full bg-black text-white text-[9px]">Primary</span>
+                  <span class="px-3 py-2 rounded-full bg-white border text-[9px]">Secondary</span>
+                  <span class="px-3 py-2 rounded-full bg-lime text-[9px]">Action</span>
+                  <span class="px-3 py-2 rounded-full bg-white border text-[9px]">Filter</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <!-- NOTES -->
+          <aside class="hidden xl:block">
+            <div class="bg-black text-white rounded-[30px] p-6 sticky top-8">
+              <p class="text-[10px] uppercase tracking-[.2em] text-gray-500 font-bold">Implementation</p>
+              <h2 class="text-2xl font-semibold tracking-tight mt-2">Single HTML</h2>
+              <p class="text-xs text-gray-400 leading-relaxed mt-4">
+                Mobile-first interface recreated from the reference using Tailwind utilities, Lucide icons and a small CSS layer only where visual treatment needs custom behavior.
+              </p>
+
+              <div class="mt-6 space-y-3 text-[10px]">
+                <div class="flex gap-3"><span class="text-lime">01</span> Responsive layout</div>
+                <div class="flex gap-3"><span class="text-lime">02</span> Three interactive states</div>
+                <div class="flex gap-3"><span class="text-lime">03</span> Hotel card system</div>
+                <div class="flex gap-3"><span class="text-lime">04</span> Bottom navigation</div>
+                <div class="flex gap-3"><span class="text-lime">05</span> Detail / booking flow</div>
+              </div>
+            </div>
+          </aside>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    function go(screen) {
+      document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById(screen + 'Screen');
+      if (target) target.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>
