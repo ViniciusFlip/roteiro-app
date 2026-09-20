@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+  />
+
+  <title>Experiência Náutica</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "system-ui", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/ScrollTrigger.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+
+    body {
+      margin: 0;
+      background: #061b2b;
+      color: white;
+      font-family: Inter, system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    .journey {
+      position: relative;
+      height: 700vh;
+    }
+
+    .viewport {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      min-height: 620px;
+      overflow: hidden;
+      background: #087f9b;
+    }
+
+    /* =====================================================
+       MAPA
+    ===================================================== */
+
+    .map-camera {
+      position: absolute;
+      inset: -20%;
+      transform-origin: center center;
+      will-change: transform;
+    }
+
+    .ocean {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(
+          ellipse at 20% 25%,
+          rgba(125, 241, 226, .32),
+          transparent 35%
+        ),
+        radial-gradient(
+          ellipse at 75% 65%,
+          rgba(0, 89, 133, .45),
+          transparent 40%
+        ),
+        linear-gradient(
+          135deg,
+          #48d8d0 0%,
+          #0e9fb1 35%,
+          #087d9c 65%,
+          #045a7d 100%
+        );
+    }
+
+    .water-texture {
+      position: absolute;
+      inset: 0;
+      opacity: .24;
+      background-image:
+        repeating-linear-gradient(
+          12deg,
+          transparent 0,
+          transparent 11px,
+          rgba(255,255,255,.13) 12px,
+          transparent 13px
+        );
+      transform: scale(1.2);
+    }
+
+    .depth {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(
+          ellipse at 60% 40%,
+          transparent 0%,
+          rgba(0, 50, 80, .12) 55%,
+          rgba(0, 24, 45, .34) 100%
+        );
+    }
+
+    /* Ilhas / praias estilizadas para simular visualização aérea */
+
+    .land {
+      position: absolute;
+      background:
+        linear-gradient(
+          135deg,
+          #d8dfbd,
+          #a9c68e 45%,
+          #6b9b68
+        );
+      box-shadow:
+        inset 0 0 40px rgba(47, 82, 48, .3),
+        0 20px 60px rgba(0, 43, 61, .2);
+      filter: saturate(.9);
+    }
+
+    .land::after {
+      content: "";
+      position: absolute;
+      inset: 5%;
+      border-radius: inherit;
+      border: 14px solid rgba(245, 225, 163, .42);
+    }
+
+    .island-1 {
+      width: 430px;
+      height: 250px;
+      left: -100px;
+      top: 10%;
+      border-radius: 62% 38% 55% 45% / 55% 40% 60% 45%;
+      transform: rotate(-17deg);
+    }
+
+    .island-2 {
+      width: 320px;
+      height: 210px;
+      right: -70px;
+      top: 38%;
+      border-radius: 40% 60% 44% 56% / 56% 43% 57% 44%;
+      transform: rotate(23deg);
+    }
+
+    .island-3 {
+      width: 500px;
+      height: 260px;
+      left: 28%;
+      bottom: -100px;
+      border-radius: 48% 52% 64% 36% / 40% 55% 45% 60%;
+      transform: rotate(-12deg);
+    }
+
+    .beach-glow {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        ellipse,
+        rgba(255, 239, 181, .4),
+        transparent 65%
+      );
+      filter: blur(10px);
+    }
+
+    /* =====================================================
+       ROTA
+    ===================================================== */
+
+    .route-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    #routeSvg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .route-shadow {
+      fill: none;
+      stroke: rgba(0, 46, 66, .25);
+      stroke-width: 11;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .route-base {
+      fill: none;
+      stroke: rgba(255,255,255,.28);
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .route-progress {
+      fill: none;
+      stroke: white;
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 7px rgba(255,255,255,.55));
+    }
+
+    /* =====================================================
+       BARCO
+    ===================================================== */
+
+    .boat {
+      position: absolute;
+      width: 76px;
+      height: 76px;
+      left: 0;
+      top: 0;
+      z-index: 20;
+      transform-origin: center center;
+      will-change: transform;
+      filter:
+        drop-shadow(0 12px 10px rgba(0, 31, 44, .4))
+        drop-shadow(0 0 12px rgba(255,255,255,.25));
+    }
+
+    .boat-inner {
+      width: 100%;
+      height: 100%;
+      transform: translate(-50%, -50%);
+    }
+
+    .boat-wake {
+      position: absolute;
+      width: 90px;
+      height: 18px;
+      left: -45px;
+      top: 22px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.36);
+      filter: blur(7px);
+      opacity: .7;
+    }
+
+    /* =====================================================
+       UI
+    ===================================================== */
+
+    .ui {
+      position: absolute;
+      inset: 0;
+      z-index: 40;
+      pointer-events: none;
+    }
+
+    .topbar {
+      position: absolute;
+      top: max(20px, env(safe-area-inset-top));
+      left: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 13px;
+      border-radius: 999px;
+      background: rgba(5, 30, 43, .35);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.16);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .brand-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 10px white;
+    }
+
+    .progress-pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(5, 30, 43, .35);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.16);
+      font-size: 11px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .story {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: max(36px, env(safe-area-inset-bottom));
+      max-width: 390px;
+    }
+
+    .story-card {
+      padding: 20px;
+      border-radius: 24px;
+      background: rgba(3, 27, 40, .38);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 20px 70px rgba(0,0,0,.18);
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 9px;
+      color: rgba(255,255,255,.75);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow-line {
+      width: 22px;
+      height: 1px;
+      background: rgba(255,255,255,.65);
+    }
+
+    .story h1 {
+      margin: 0;
+      font-size: clamp(30px, 8vw, 48px);
+      line-height: .95;
+      letter-spacing: -.055em;
+      font-weight: 700;
+    }
+
+    .story p {
+      margin: 12px 0 0;
+      color: rgba(255,255,255,.75);
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 320px;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: rgba(255,255,255,.7);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      transition: opacity .3s;
+    }
+
+    .scroll-wheel {
+      width: 20px;
+      height: 30px;
+      border: 1px solid rgba(255,255,255,.6);
+      border-radius: 999px;
+      position: relative;
+    }
+
+    .scroll-wheel::after {
+      content: "";
+      position: absolute;
+      width: 3px;
+      height: 6px;
+      left: 50%;
+      top: 6px;
+      transform: translateX(-50%);
+      border-radius: 99px;
+      background: white;
+      animation: scrollDot 1.5s infinite;
+    }
+
+    @keyframes scrollDot {
+      0% { transform: translate(-50%, 0); opacity: 1; }
+      80% { transform: translate(-50%, 10px); opacity: 0; }
+      100% { opacity: 0; }
+    }
+
+    /* =====================================================
+       MARCADORES
+    ===================================================== */
+
+    .marker {
+      position: absolute;
+      z-index: 15;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .marker-dot {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: white;
+      border: 4px solid rgba(3, 66, 88, .45);
+      box-shadow: 0 0 0 5px rgba(255,255,255,.15);
+    }
+
+    .marker-label {
+      position: absolute;
+      left: 23px;
+      top: -6px;
+      white-space: nowrap;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(4, 32, 46, .6);
+      border: 1px solid rgba(255,255,255,.15);
+      backdrop-filter: blur(12px);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    /* =====================================================
+       FINAL CTA
+    ===================================================== */
+
+    .final-cta {
+      position: absolute;
+      inset: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      background:
+        linear-gradient(
+          to bottom,
+          rgba(3, 27, 40, 0),
+          rgba(3, 27, 40, .7)
+        );
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .final-content {
+      max-width: 390px;
+    }
+
+    .final-content span {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.7);
+    }
+
+    .final-content h2 {
+      margin: 12px 0;
+      font-size: clamp(42px, 11vw, 72px);
+      line-height: .9;
+      letter-spacing: -.06em;
+    }
+
+    .final-content p {
+      margin: 0 auto 22px;
+      max-width: 300px;
+      color: rgba(255,255,255,.75);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 25px;
+      border-radius: 999px;
+      background: white;
+      color: #063148;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 15px 45px rgba(0,0,0,.25);
+      pointer-events: auto;
+    }
+
+    /* desktop */
+
+    @media (min-width: 768px) {
+      .story {
+        left: 50px;
+        bottom: 50px;
+      }
+
+      .topbar {
+        left: 40px;
+        right: 40px;
+      }
+
+      .boat {
+        width: 90px;
+        height: 90px;
+      }
+
+      .story-card {
+        padding: 24px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="journey" id="journey">
+
+    <section class="viewport">
+
+      <!-- ==================================================
+           CÂMERA
+      =================================================== -->
+
+      <div class="map-camera" id="camera">
+
+        <div class="ocean"></div>
+        <div class="water-texture"></div>
+        <div class="depth"></div>
+
+        <div class="land island-1">
+          <div class="beach-glow"></div>
+        </div>
+
+        <div class="land island-2">
+          <div class="beach-glow"></div>
+        </div>
+
+        <div class="land island-3">
+          <div class="beach-glow"></div>
+        </div>
+
+        <!-- ==================================================
+             ROTA SVG
+        =================================================== -->
+
+        <div class="route-layer">
+
+          <svg
+            id="routeSvg"
+            viewBox="0 0 1000 1000"
+            preserveAspectRatio="none"
+          >
+
+            <path
+              id="routeShadow"
+              class="route-shadow"
+              d="
+                M 120 760
+                C 180 710, 205 625, 290 610
+                C 375 595, 395 690, 470 640
+                C 550 585, 510 480, 590 440
+                C 670 400, 730 455, 760 370
+                C 795 275, 700 210, 770 145
+              "
+            />
+
+            <path
+              id="routeBase"
+              class="route-base"
+              d="
+                M 120 760
+                C 180 710, 205 625, 290 610
+                C 375 595, 395 690, 470 640
+                C 550 585, 510 480, 590 440
+                C 670 400, 730 455, 760 370
+                C 795 275, 700 210, 770 145
+              "
+            />
+
+            <path
+              id="routeProgress"
+              class="route-progress"
+              d="
+                M 120 760
+                C 180 710, 205 625, 290 610
+                C 375 595, 395 690, 470 640
+                C 550 585, 510 480, 590 440
+                C 670 400, 730 455, 760 370
+                C 795 275, 700 210, 770 145
+              "
+            />
+
+          </svg>
+
+          <!-- ==================================================
+               MARCADORES
+          =================================================== -->
+
+          <div
+            class="marker"
+            data-progress="0.00"
+            style="left:12%;top:76%"
+          >
+            <div class="marker-dot"></div>
+            <div class="marker-label">Partida</div>
+          </div>
+
+          <div
+            class="marker"
+            data-progress="0.27"
+            style="left:29%;top:61%"
+          >
+            <div class="marker-dot"></div>
+            <div class="marker-label">Baía Azul</div>
+          </div>
+
+          <div
+            class="marker"
+            data-progress="0.56"
+            style="left:59%;top:44%"
+          >
+            <div class="marker-dot"></div>
+            <div class="marker-label">Ilha Verde</div>
+          </div>
+
+          <div
+            class="marker"
+            data-progress="0.79"
+            style="left:76%;top:37%"
+          >
+            <div class="marker-dot"></div>
+            <div class="marker-label">Praia Secreta</div>
+          </div>
+
+          <div
+            class="marker"
+            data-progress="1"
+            style="left:77%;top:14.5%"
+          >
+            <div class="marker-dot"></div>
+            <div class="marker-label">Destino</div>
+          </div>
+
+        </div>
+
+        <!-- ==================================================
+             BARCO
+        =================================================== -->
+
+        <div class="boat" id="boat">
+
+          <div class="boat-wake"></div>
+
+          <div class="boat-inner">
+
+            <!--
+              TROQUE ESTE SVG PELA IMAGEM REAL DO BARCO.
+
+              Exemplo:
+              <img src="assets/barco.png" alt="">
+            -->
+
+            <svg
+              viewBox="0 0 100 100"
+              width="100%"
+              height="100%"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+
+              <defs>
+                <linearGradient
+                  id="boatBody"
+                  x1="0"
+                  y1="0"
+                  x2="1"
+                  y2="1"
+                >
+                  <stop offset="0" stop-color="#ffffff"/>
+                  <stop offset="1" stop-color="#cbd8dd"/>
+                </linearGradient>
+              </defs>
+
+              <!-- casco -->
+              <path
+                d="
+                  M50 5
+                  C64 17 77 34 82 52
+                  C87 71 76 89 50 96
+                  C24 89 13 71 18 52
+                  C23 34 36 17 50 5Z
+                "
+                fill="url(#boatBody)"
+              />
+
+              <!-- sombra -->
+              <path
+                d="
+                  M50 10
+                  C62 27 69 45 69 60
+                  C69 76 61 84 50 89
+                  C39 84 31 76 31 60
+                  C31 45 38 27 50 10Z
+                "
+                fill="#183c4b"
+                opacity=".8"
+              />
+
+              <!-- cabine -->
+              <path
+                d="
+                  M40 44
+                  Q50 35 60 44
+                  L64 57
+                  L36 57Z
+                "
+                fill="#f8ffff"
+              />
+
+              <!-- vidro -->
+              <path
+                d="
+                  M42 45
+                  Q50 39 58 45
+                  L60 52
+                  L40 52Z
+                "
+                fill="#65cfe0"
+              />
+
+              <!-- proa -->
+              <path
+                d="M50 5 L57 27 L50 22 L43 27Z"
+                fill="#ffffff"
+              />
+
+            </svg>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================================================
+           UI
+      =================================================== -->
+
+      <div class="ui">
+
+        <div class="topbar">
+
+          <div class="brand">
+            <span class="brand-dot"></span>
+            Mar Aberto
+          </div>
+
+          <div class="progress-pill">
+            <span id="progressText">0%</span>
+          </div>
+
+        </div>
+
+        <div class="story">
+
+          <div class="story-card">
+
+            <div class="eyebrow">
+              <span class="eyebrow-line"></span>
+              <span id="storyEyebrow">Sua viagem começa</span>
+            </div>
+
+            <h1 id="storyTitle">
+              Vamos navegar.
+            </h1>
+
+            <p id="storyDescription">
+              Deslize para descobrir o caminho.
+            </p>
+
+          </div>
+
+        </div>
+
+        <div
+          class="scroll-indicator"
+          id="scrollIndicator"
+        >
+          <div class="scroll-wheel"></div>
+          <span>Deslize</span>
+        </div>
+
+      </div>
+
+      <!-- ==================================================
+           CTA FINAL
+      =================================================== -->
+
+      <div
+        class="final-cta"
+        id="finalCta"
+      >
+
+        <div class="final-content">
+
+          <span>Você chegou</span>
+
+          <h2>
+            O mar<br>
+            espera.
+          </h2>
+
+          <p>
+            Transforme essa rota em uma experiência real.
+            Escolha seu próximo passeio.
+          </p>
+
+          <a
+            href="#reservar"
+            class="cta"
+          >
+            Reservar passeio
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+
+    /* ======================================================
+       CONFIGURAÇÃO DA EXPERIÊNCIA
+       ====================================================== */
+
+    const EXPERIENCE = {
+
+      boat: {
+        // Para trocar pelo barco real:
+        // image: "assets/barco.png"
+        image: null
+      },
+
+      route: {
+        // A rota está no SVG acima.
+        // Para uma nova viagem, basta substituir o "d"
+        // dos paths.
+      },
+
+      stories: [
+
+        {
+          start: 0,
+          end: .10,
+          eyebrow: "Sua viagem começa",
+          title: "Vamos navegar.",
+          description: "Deslize para descobrir o caminho."
+        },
+
+        {
+          start: .10,
+          end: .30,
+          eyebrow: "Primeira parada",
+          title: "Baía Azul.",
+          description: "Águas tranquilas e uma vista que só existe daqui."
+        },
+
+        {
+          start: .30,
+          end: .60,
+          eyebrow: "Pelo caminho",
+          title: "Siga o mar.",
+          description: "A viagem continua por uma rota cercada de natureza."
+        },
+
+        {
+          start: .60,
+          end: .82,
+          eyebrow: "Quase lá",
+          title: "Praia Secreta.",
+          description: "Um pequeno paraíso escondido no caminho."
+        },
+
+        {
+          start: .82,
+          end: .96,
+          eyebrow: "Última parada",
+          title: "Chegamos.",
+          description: "Agora é hora de aproveitar o destino."
+        },
+
+        {
+          start: .96,
+          end: 1,
+          eyebrow: "Experiência completa",
+          title: "O mar espera.",
+          description: "Reserve seu próximo passeio."
+        }
+
+      ]
+
+    };
+
+
+    /* ======================================================
+       ELEMENTOS
+       ====================================================== */
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const journey = document.querySelector("#journey");
+    const camera = document.querySelector("#camera");
+    const boat = document.querySelector("#boat");
+
+    const route = document.querySelector("#routeProgress");
+
+    const progressText =
+      document.querySelector("#progressText");
+
+    const storyEyebrow =
+      document.querySelector("#storyEyebrow");
+
+    const storyTitle =
+      document.querySelector("#storyTitle");
+
+    const storyDescription =
+      document.querySelector("#storyDescription");
+
+    const storyCard =
+      document.querySelector(".story-card");
+
+    const finalCta =
+      document.querySelector("#finalCta");
+
+    const scrollIndicator =
+      document.querySelector("#scrollIndicator");
+
+
+    /* ======================================================
+       COMPRIMENTO DA ROTA
+       ====================================================== */
+
+    const routeLength =
+      route.getTotalLength();
+
+    route.style.strokeDasharray =
+      routeLength;
+
+    route.style.strokeDashoffset =
+      routeLength;
+
+
+    /* ======================================================
+       CONVERTER SVG → VIEWPORT
+       ====================================================== */
+
+    function svgPointToViewport(point) {
+
+      const svg =
+        document.querySelector("#routeSvg");
+
+      const rect =
+        svg.getBoundingClientRect();
+
+      return {
+
+        x:
+          rect.left +
+          point.x / 1000 *
+          rect.width,
+
+        y:
+          rect.top +
+          point.y / 1000 *
+          rect.height
+
+      };
+
+    }
+
+
+    /* ======================================================
+       POSIÇÃO DO BARCO
+       ====================================================== */
+
+    function updateBoat(progress) {
+
+      const distance =
+        routeLength * progress;
+
+      const current =
+        route.getPointAtLength(distance);
+
+      const nextDistance =
+        Math.min(
+          routeLength,
+          distance + 2
+        );
+
+      const next =
+        route.getPointAtLength(nextDistance);
+
+      const angle =
+        Math.atan2(
+          next.y - current.y,
+          next.x - current.x
+        ) *
+        180 /
+        Math.PI;
+
+      const point =
+        svgPointToViewport(current);
+
+      /*
+        O barco é posicionado em relação ao
+        viewport visual, não ao documento.
+      */
+
+      const rect =
+        document
+          .querySelector("#routeSvg")
+          .getBoundingClientRect();
+
+      const x =
+        rect.left +
+        current.x / 1000 *
+        rect.width;
+
+      const y =
+        rect.top +
+        current.y / 1000 *
+        rect.height;
+
+      /*
+        Como o barco está dentro do camera layer,
+        convertemos a posição para o espaço da câmera.
+      */
+
+      const cameraRect =
+        camera.getBoundingClientRect();
+
+      const localX =
+        x -
+        cameraRect.left;
+
+      const localY =
+        y -
+        cameraRect.top;
+
+      gsap.set(
+        boat,
+        {
+          x: localX,
+          y: localY,
+          rotation: angle + 90
+        }
+      );
+
+    }
+
+
+    /* ======================================================
+       HISTÓRIA
+       ====================================================== */
+
+    let currentStory = -1;
+
+    function updateStory(progress) {
+
+      let index = 0;
+
+      EXPERIENCE.stories.forEach(
+        (story, i) => {
+
+          if (
+            progress >= story.start &&
+            progress <= story.end
+          ) {
+            index = i;
+          }
+
+        }
+      );
+
+      if (index === currentStory) {
+        return;
+      }
+
+      currentStory = index;
+
+      const story =
+        EXPERIENCE.stories[index];
+
+      gsap.timeline()
+
+        .to(
+          storyCard,
+          {
+            opacity: 0,
+            y: 10,
+            duration: .16
+          }
+        )
+
+        .call(() => {
+
+          storyEyebrow.textContent =
+            story.eyebrow;
+
+          storyTitle.textContent =
+            story.title;
+
+          storyDescription.textContent =
+            story.description;
+
+        })
+
+        .to(
+          storyCard,
+          {
+            opacity: 1,
+            y: 0,
+            duration: .3,
+            ease: "power2.out"
+          }
+        );
+
+    }
+
+
+    /* ======================================================
+       CÂMERA
+       ====================================================== */
+
+    function updateCamera(progress) {
+
+      /*
+        Pequeno movimento cinematográfico.
+
+        Em vez de simplesmente seguir o barco,
+        a câmera também faz um leve zoom.
+      */
+
+      const zoom =
+        1 +
+        Math.sin(progress * Math.PI) *
+        .10;
+
+      const panX =
+        -progress * 3;
+
+      const panY =
+        progress * 2;
+
+      gsap.set(
+        camera,
+        {
+          scale: zoom,
+          xPercent: panX,
+          yPercent: panY
+        }
+      );
+
+    }
+
+
+    /* ======================================================
+       MARCADORES
+       ====================================================== */
+
+    const markers =
+      document.querySelectorAll(".marker");
+
+    function updateMarkers(progress) {
+
+      markers.forEach(marker => {
+
+        const markerProgress =
+          Number(
+            marker.dataset.progress
+          );
+
+        const distance =
+          Math.abs(
+            progress -
+            markerProgress
+          );
+
+        const opacity =
+          progress >= markerProgress
+            ? 1
+            : .35;
+
+        gsap.to(
+          marker,
+          {
+            opacity,
+            scale:
+              distance < .025
+                ? 1.12
+                : 1,
+            duration: .2,
+            overwrite: true
+          }
+        );
+
+      });
+
+    }
+
+
+    /* ======================================================
+       PROGRESSO PRINCIPAL
+       ====================================================== */
+
+    function updateExperience(progress) {
+
+      progress =
+        Math.max(
+          0,
+          Math.min(
+            1,
+            progress
+          )
+        );
+
+      /*
+        IMPORTANTE:
+
+        Aqui não existe uma segunda animação
+        tentando "alcançar" o scroll.
+
+        O barco recebe diretamente o progresso.
+      */
+
+      route.style.strokeDashoffset =
+        routeLength *
+        (1 - progress);
+
+      updateBoat(progress);
+
+      updateCamera(progress);
+
+      updateStory(progress);
+
+      updateMarkers(progress);
+
+      progressText.textContent =
+        Math.round(progress * 100) + "%";
+
+
+      /* indicador */
+
+      gsap.set(
+        scrollIndicator,
+        {
+          opacity:
+            progress > .035
+              ? 0
+              : 1
+        }
+      );
+
+
+      /* CTA final */
+
+      if (progress > .91) {
+
+        gsap.to(
+          finalCta,
+          {
+            autoAlpha:
+              Math.min(
+                1,
+                (progress - .91) / .07
+              ),
+            duration: .25,
+            overwrite: true
+          }
+        );
+
+      } else {
+
+        gsap.to(
+          finalCta,
+          {
+            autoAlpha: 0,
+            duration: .2,
+            overwrite: true
+          }
+        );
+
+      }
+
+    }
+
+
+    /* ======================================================
+       SCROLLTRIGGER
+       ====================================================== */
+
+    const state = {
+      progress: 0
+    };
+
+    ScrollTrigger.create({
+
+      trigger: journey,
+
+      start: "top top",
+
+      end: "bottom bottom",
+
+      scrub: true,
+
+      invalidateOnRefresh: true,
+
+      onUpdate: self => {
+
+        /*
+          ScrollTrigger transforma o scroll
+          diretamente em uma variável de 0 → 1.
+        */
+
+        state.progress =
+          self.progress;
+
+        updateExperience(
+          state.progress
+        );
+
+      }
+
+    });
+
+
+    /* ======================================================
+       PRIMEIRO FRAME
+       ====================================================== */
+
+    requestAnimationFrame(() => {
+
+      updateExperience(0);
+
+      ScrollTrigger.refresh();
+
+    });
+
+
+    /* ======================================================
+       RESIZE
+       ====================================================== */
+
+    let resizeTimer;
+
+    window.addEventListener(
+      "resize",
+      () => {
+
+        clearTimeout(
+          resizeTimer
+        );
+
+        resizeTimer =
+          setTimeout(() => {
+
+            ScrollTrigger.refresh();
+
+            updateExperience(
+              state.progress
+            );
+
+          }, 150);
+
+      }
+    );
+
+
+    /* ======================================================
+       PREVENIR SALTO NO LOAD
+       ====================================================== */
+
+    window.addEventListener(
+      "load",
+      () => {
+
+        ScrollTrigger.refresh();
+
+        updateExperience(
+          state.progress
+        );
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
