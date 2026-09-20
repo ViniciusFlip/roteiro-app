@@ -1,803 +1,1283 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Passeios de escuna e lancha em Ubatuba. Descubra ilhas, praias e experiências inesquecíveis pelo litoral de São Paulo.">
-<meta name="theme-color" content="#063F4A">
-<title>Ubatuba Náutica — Uma viagem que começa no scroll</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#087f9b">
+  <title>Mar Aberto — Experiência Náutica</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "system-ui", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
 
-<style>
-:root{
-  --ocean-950:#042E36;
-  --ocean-900:#063F4A;
-  --ocean-800:#075765;
-  --ocean-700:#08788A;
-  --aqua:#38C6C0;
-  --sand:#E7D4B0;
-  --cream:#F7F3EA;
-  --white:#FFFFFF;
-  --ink:#10262B;
-  --muted:#668087;
-  --line:rgba(255,255,255,.16);
-  --dark-line:rgba(16,38,43,.12);
-  --radius:26px;
-  --shadow:0 25px 80px rgba(4,46,54,.16);
-}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/ScrollTrigger.min.js"></script>
 
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  font-family:"DM Sans",sans-serif;
-  color:var(--ink);
-  background:var(--cream);
-  overflow-x:hidden;
-}
-a{text-decoration:none;color:inherit}
-button,input,select,textarea{font:inherit}
+  <style>
+    * { box-sizing: border-box; }
 
-.noise{
-  position:fixed;inset:0;pointer-events:none;z-index:100;
-  opacity:.025;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
-}
-.container{width:min(1180px,calc(100% - 48px));margin:auto}
-.eyebrow{
-  display:flex;align-items:center;gap:10px;
-  text-transform:uppercase;letter-spacing:.18em;font-size:11px;font-weight:700;
-}
-.eyebrow::before{content:"";width:28px;height:1px;background:currentColor}
-.serif{font-family:"Playfair Display",serif}
+    html { scroll-behavior: auto; }
 
-/* HEADER */
-header{
-  position:fixed;top:0;left:0;width:100%;z-index:50;
-  padding:22px 0;transition:.45s ease;
-}
-header.scrolled{
-  padding:13px 0;background:rgba(4,46,54,.82);
-  backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.1)
-}
-.nav{display:flex;align-items:center;justify-content:space-between;color:#fff}
-.logo{font-size:18px;font-weight:700;letter-spacing:-.03em}
-.logo span{font-weight:400;opacity:.65}
-.nav-links{display:flex;gap:30px;font-size:13px}
-.nav-links a{opacity:.78;transition:.3s}
-.nav-links a:hover{opacity:1}
-.nav-cta{
-  padding:11px 17px;border:1px solid rgba(255,255,255,.3);border-radius:99px;
-  font-size:12px;transition:.3s
-}
-.nav-cta:hover{background:#fff;color:var(--ocean-900)}
+    body {
+      margin: 0;
+      background: #061b2b;
+      color: #fff;
+      font-family: Inter, system-ui, sans-serif;
+      overflow-x: hidden;
+    }
 
-/* HERO */
-.hero{
-  min-height:100svh;position:relative;overflow:hidden;
-  color:#fff;background:#063F4A;
-}
-.hero-ocean{
-  position:absolute;inset:0;
-  background:
-    radial-gradient(circle at 74% 26%,rgba(56,198,192,.5),transparent 22%),
-    radial-gradient(circle at 28% 72%,rgba(0,106,121,.75),transparent 30%),
-    linear-gradient(135deg,#021F27 0%,#07515D 45%,#1195A0 100%);
-}
-.hero-ocean::before,.ocean-stage::before{
-  content:"";position:absolute;inset:-20%;
-  opacity:.28;
-  background:
-    repeating-radial-gradient(ellipse at 50% 45%,transparent 0 22px,rgba(255,255,255,.12) 23px 24px,transparent 25px 45px);
-  transform:rotate(-12deg) scale(1.2);
-  animation:water 18s linear infinite;
-}
-@keyframes water{to{transform:rotate(-12deg) scale(1.2) translate3d(5%,2%,0)}}
+    ::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
 
-.hero::after{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(90deg,rgba(2,31,39,.75),transparent 62%),linear-gradient(0deg,rgba(2,31,39,.45),transparent 40%);
-}
-.hero-content{position:relative;z-index:3;padding-top:22vh}
-.hero-copy{max-width:650px}
-.hero .eyebrow{color:#BDEBE8}
-.hero h1{
-  font-size:clamp(58px,9vw,128px);line-height:.86;letter-spacing:-.07em;
-  margin:20px 0 25px;max-width:720px;
-}
-.hero h1 em{font-style:normal;font-family:"Playfair Display",serif;font-weight:500}
-.hero p{max-width:480px;color:rgba(255,255,255,.76);font-size:16px;line-height:1.7}
-.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:12px;
-  border:0;border-radius:999px;padding:15px 22px;cursor:pointer;
-  font-weight:700;font-size:13px;transition:transform .35s,background .35s,color .35s;
-}
-.btn:hover{transform:translateY(-3px)}
-.btn-primary{background:var(--sand);color:var(--ocean-950)}
-.btn-ghost{color:#fff;border:1px solid rgba(255,255,255,.28)}
-.btn-ghost:hover{background:rgba(255,255,255,.12)}
+    .journey {
+      position: relative;
+      height: 700vh;
+    }
 
-.hero-meta{
-  position:absolute;z-index:3;bottom:34px;left:50%;transform:translateX(-50%);
-  width:min(1180px,calc(100% - 48px));display:flex;justify-content:space-between;align-items:end;
-}
-.trust{display:flex;align-items:center;gap:12px;font-size:12px;color:rgba(255,255,255,.7)}
-.avatar-stack{display:flex}.avatar{width:28px;height:28px;border-radius:50%;margin-right:-7px;border:2px solid #07515D;background:linear-gradient(135deg,#E7D4B0,#fff)}
-.scroll-cue{font-size:10px;letter-spacing:.2em;text-transform:uppercase;display:flex;gap:10px;align-items:center}
-.scroll-cue i{display:block;width:1px;height:48px;background:rgba(255,255,255,.5);animation:pulse 1.6s infinite}
-@keyframes pulse{50%{transform:scaleY(.5);transform-origin:top;opacity:.35}}
+    .viewport {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      min-height: 620px;
+      overflow: hidden;
+      background: #087f9b;
+    }
 
-/* TOP-DOWN BOAT */
-.boat-image{position:absolute;z-index:2;pointer-events:none;width:clamp(190px,20vw,330px);height:auto;filter:drop-shadow(0 24px 28px rgba(0,20,24,.28));transform-origin:center center;will-change:transform,left,top}
-.hero-boat{left:61%;top:28%;animation:heroSail 8s ease-in-out infinite}
-.boat-wake{position:absolute;z-index:1;pointer-events:none;width:clamp(220px,24vw,390px);height:160px;left:58%;top:34%;opacity:.72;transform:rotate(-22deg);filter:blur(1px);background:radial-gradient(ellipse at center,rgba(255,255,255,.32) 0 5%,transparent 28%),radial-gradient(ellipse at 45% 50%,rgba(255,255,255,.2),transparent 55%);animation:wakeFloat 3.5s ease-in-out infinite}
-@keyframes heroSail{0%,100%{transform:translate3d(0,0,0) rotate(12deg)}50%{transform:translate3d(-18px,14px,0) rotate(9deg)}}
-@keyframes wakeFloat{50%{transform:rotate(-22deg) scale(1.08) translateX(-8px);opacity:.48}}
-.boat-hint{
-  position:absolute;right:6%;top:18%;z-index:3;padding:9px 13px;border:1px solid rgba(255,255,255,.22);
-  border-radius:99px;background:rgba(4,46,54,.25);backdrop-filter:blur(10px);
-  font-size:10px;letter-spacing:.14em;text-transform:uppercase
-}
+    /* =========================================================
+       CÂMERA / CENÁRIO
+    ========================================================= */
 
-/* VOYAGE */
-.voyage{position:relative;height:430vh;background:var(--ocean-950);color:#fff}
-.ocean-stage{position:sticky;top:0;height:100svh;overflow:hidden;background:
-  radial-gradient(circle at 75% 20%,#087E8D 0%,transparent 30%),
-  radial-gradient(circle at 10% 85%,#063F4A 0%,transparent 35%),
-  linear-gradient(140deg,#052D35,#087080 65%,#0B9DA1);
-}
-.ocean-stage::after{
-  content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,46,54,.92) 0%,rgba(4,46,54,.52) 38%,transparent 72%);
-  pointer-events:none;
-}
-#voyageBoat{position:absolute;z-index:3;width:clamp(170px,17vw,285px);height:auto;left:50%;top:55%;transform:translate(-50%,-50%) rotate(12deg);pointer-events:none;filter:drop-shadow(0 22px 24px rgba(0,20,24,.32));will-change:left,top,transform}
-.voyage-wake{position:absolute;z-index:2;width:300px;height:170px;left:50%;top:56%;transform:translate(-50%,-50%) rotate(-18deg);background:radial-gradient(ellipse at center,rgba(255,255,255,.24),transparent 62%);filter:blur(2px);pointer-events:none;opacity:.65;will-change:left,top,transform}
-.route-line{
-  position:absolute;z-index:2;left:9%;right:9%;top:55%;height:2px;
-  background:rgba(255,255,255,.14);transform-origin:left;
-}
-.route-progress{height:100%;width:0;background:var(--sand);box-shadow:0 0 20px rgba(231,212,176,.45)}
-.route-marker{
-  position:absolute;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border:2px solid #fff;
-  border-radius:50%;background:var(--ocean-700);box-shadow:0 0 0 7px rgba(255,255,255,.08)
-}
-.route-marker span{position:absolute;top:20px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
-.m1{left:15%}.m2{left:38%}.m3{left:62%}.m4{left:84%}
+    .map-camera {
+      position: absolute;
+      inset: -20%;
+      transform-origin: center center;
+      will-change: transform;
+    }
 
-.voyage-copy{
-  position:absolute;z-index:4;left:6%;top:16%;width:min(520px,45%);
-}
-.route-counter{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#BDEBE8;margin-bottom:18px}
-.voyage-copy h2{font-size:clamp(42px,5.5vw,78px);line-height:.92;letter-spacing:-.06em;margin-bottom:22px}
-.voyage-copy p{color:rgba(255,255,255,.72);line-height:1.7;max-width:470px}
-.route-panel{
-  position:absolute;z-index:5;right:6%;bottom:9%;width:min(380px,40%);
-  padding:25px;border:1px solid rgba(255,255,255,.16);background:rgba(4,46,54,.32);
-  backdrop-filter:blur(18px);border-radius:24px;
-}
-.route-panel h3{font-size:20px;margin-bottom:10px}
-.route-panel p{font-size:13px;color:rgba(255,255,255,.68);line-height:1.6}
-.route-facts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
-.fact{padding:13px;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:rgba(255,255,255,.04)}
-.fact small{display:block;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:#BDEBE8;margin-bottom:5px}
-.fact strong{font-size:12px}
-.route-steps{display:flex;gap:7px;margin-top:18px;flex-wrap:wrap}
-.route-steps span{font-size:10px;padding:7px 9px;border-radius:99px;background:rgba(255,255,255,.08)}
+    .ocean {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 25%, rgba(125,241,226,.32), transparent 35%),
+        radial-gradient(ellipse at 75% 65%, rgba(0,89,133,.45), transparent 40%),
+        linear-gradient(135deg, #48d8d0 0%, #0e9fb1 35%, #087d9c 65%, #045a7d 100%);
+    }
 
-.boat-label{
-  position:absolute;z-index:6;left:50%;top:55%;transform:translate(-50%,-50%);
-  color:#fff;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
-  padding:8px 11px;border:1px solid rgba(255,255,255,.2);border-radius:99px;
-  background:rgba(4,46,54,.2);backdrop-filter:blur(8px);opacity:.8
-}
+    .water-texture {
+      position: absolute;
+      inset: 0;
+      opacity: .24;
+      background-image:
+        repeating-linear-gradient(
+          12deg,
+          transparent 0,
+          transparent 11px,
+          rgba(255,255,255,.13) 12px,
+          transparent 13px
+        );
+      transform: scale(1.2);
+    }
 
-/* GENERAL SECTIONS */
-.light-section{padding:130px 0;background:var(--cream)}
-.section-head{display:flex;justify-content:space-between;align-items:end;gap:40px;margin-bottom:60px}
-.section-head h2{font-size:clamp(40px,5vw,72px);line-height:.95;letter-spacing:-.06em;max-width:650px}
-.section-head p{max-width:390px;color:var(--muted);line-height:1.7;font-size:14px}
-.dark-section{background:var(--ocean-950);color:#fff;padding:120px 0}
+    .depth {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(
+          ellipse at 60% 40%,
+          transparent 0%,
+          rgba(0,50,80,.12) 55%,
+          rgba(0,24,45,.34) 100%
+        );
+    }
 
-/* INFO */
-.info-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:22px}
-.info-card{background:#fff;border-radius:var(--radius);padding:38px;box-shadow:0 10px 50px rgba(4,46,54,.06)}
-.info-card.feature{min-height:430px;background:linear-gradient(135deg,#07515D,#087F89);color:#fff;position:relative;overflow:hidden}
-.info-card.feature::after{content:"01";position:absolute;right:-10px;bottom:-55px;font-size:230px;font-family:"Playfair Display";color:rgba(255,255,255,.06)}
-.info-card h3{font-size:28px;margin:12px 0}
-.info-card p{font-size:14px;line-height:1.7;color:var(--muted)}
-.feature p{color:rgba(255,255,255,.72)}
-.info-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:30px}
-.info-list div{padding:16px;border-radius:15px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1)}
-.info-list small{display:block;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#BDEBE8;margin-bottom:6px}
-.info-list strong{font-size:12px}
+    .land {
+      position: absolute;
+      background: linear-gradient(135deg, #d8dfbd, #a9c68e 45%, #6b9b68);
+      box-shadow:
+        inset 0 0 40px rgba(47,82,48,.3),
+        0 20px 60px rgba(0,43,61,.2);
+      filter: saturate(.9);
+    }
 
-/* DESTINATIONS */
-.destination-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.destination{position:relative;height:390px;border-radius:22px;overflow:hidden;background:#07515D}
-.destination::before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(2,31,39,.85),transparent 55%)}
-.destination:nth-child(1){background:linear-gradient(145deg,#123F46,#13A0A1)}
-.destination:nth-child(2){background:linear-gradient(145deg,#234D43,#0B9CA5)}
-.destination:nth-child(3){background:linear-gradient(145deg,#06465B,#1AB7B0)}
-.destination:nth-child(4){background:linear-gradient(145deg,#36584D,#087E8D)}
-.dest-content{position:absolute;left:20px;right:20px;bottom:20px;z-index:2}
-.dest-number{font-size:10px;letter-spacing:.18em;color:#BDEBE8}
-.dest-content h3{font-size:23px;margin:7px 0}
-.dest-content p{font-size:11px;line-height:1.5;color:rgba(255,255,255,.68)}
-.dest-wave{position:absolute;width:200%;height:70%;left:-50%;bottom:-30%;border:1px solid rgba(255,255,255,.15);border-radius:50%;transform:rotate(-8deg)}
+    .land::after {
+      content: "";
+      position: absolute;
+      inset: 5%;
+      border-radius: inherit;
+      border: 14px solid rgba(245,225,163,.42);
+    }
 
-/* BENEFITS */
-.benefits{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--dark-line);border:1px solid var(--dark-line);border-radius:24px;overflow:hidden}
-.benefit{padding:34px;background:var(--cream)}
-.benefit-icon{width:42px;height:42px;border:1px solid var(--dark-line);border-radius:50%;display:grid;place-items:center;margin-bottom:45px;font-size:16px}
-.benefit h3{font-size:18px;margin-bottom:10px}
-.benefit p{font-size:12px;color:var(--muted);line-height:1.7}
+    .island-1 {
+      width: 430px;
+      height: 250px;
+      left: -100px;
+      top: 10%;
+      border-radius: 62% 38% 55% 45% / 55% 40% 60% 45%;
+      transform: rotate(-17deg);
+    }
 
-/* PLANS */
-.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.plan{position:relative;padding:32px;border:1px solid var(--dark-line);border-radius:24px;background:#fff;transition:.45s;overflow:hidden}
-.plan:hover{transform:translateY(-8px);box-shadow:var(--shadow)}
-.plan.featured{background:var(--ocean-900);color:#fff;transform:translateY(-12px)}
-.plan.featured:hover{transform:translateY(-18px)}
-.plan-badge{position:absolute;right:20px;top:20px;padding:7px 10px;background:var(--sand);color:var(--ocean-950);font-size:9px;font-weight:700;border-radius:99px}
-.plan small{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ocean-700)}
-.featured small{color:#BDEBE8}
-.plan h3{font-size:27px;margin:15px 0 10px}
-.plan p{font-size:13px;line-height:1.6;color:var(--muted);min-height:62px}
-.featured p{color:rgba(255,255,255,.65)}
-.price{font-size:35px;font-weight:700;margin:25px 0}
-.price span{font-size:11px;font-weight:400;color:var(--muted)}
-.plan ul{list-style:none;border-top:1px solid var(--dark-line);padding-top:18px}
-.featured ul{border-color:rgba(255,255,255,.12)}
-.plan li{font-size:12px;padding:8px 0;color:var(--muted)}
-.featured li{color:rgba(255,255,255,.72)}
-.plan li::before{content:"✓";margin-right:9px;color:var(--aqua)}
-.plan .btn{width:100%;margin-top:20px}
+    .island-2 {
+      width: 320px;
+      height: 210px;
+      right: -70px;
+      top: 38%;
+      border-radius: 40% 60% 44% 56% / 56% 43% 57% 44%;
+      transform: rotate(23deg);
+    }
 
-/* INSTAGRAM */
-.instagram{overflow:hidden}
-.marquee{display:flex;width:max-content;gap:14px;animation:marquee 34s linear infinite}
-.marquee:hover{animation-play-state:paused}
-@keyframes marquee{to{transform:translateX(-50%)}}
-.insta-card{width:250px;height:310px;border-radius:20px;overflow:hidden;position:relative;flex-shrink:0}
-.insta-card:nth-child(1),.insta-card:nth-child(7){background:linear-gradient(135deg,#06414A,#13A4A4)}
-.insta-card:nth-child(2),.insta-card:nth-child(8){background:linear-gradient(135deg,#C9B58F,#07515D)}
-.insta-card:nth-child(3),.insta-card:nth-child(9){background:linear-gradient(135deg,#0D6E73,#E4D6B9)}
-.insta-card:nth-child(4),.insta-card:nth-child(10){background:linear-gradient(135deg,#063642,#1CB1B1)}
-.insta-card:nth-child(5),.insta-card:nth-child(11){background:linear-gradient(135deg,#3B6456,#0B8894)}
-.insta-card:nth-child(6),.insta-card:nth-child(12){background:linear-gradient(135deg,#0A5863,#E2CFAD)}
-.insta-card::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.5),transparent 55%)}
-.insta-card span{position:absolute;z-index:2;bottom:17px;left:17px;color:#fff;font-size:11px;letter-spacing:.08em}
-.insta-orb{position:absolute;width:130px;height:130px;border:1px solid rgba(255,255,255,.2);border-radius:50%;top:25%;left:50%;transform:translateX(-50%)}
-.insta-orb::after{content:"";position:absolute;width:42px;height:42px;background:rgba(255,255,255,.2);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+    .island-3 {
+      width: 500px;
+      height: 260px;
+      left: 28%;
+      bottom: -100px;
+      border-radius: 48% 52% 64% 36% / 40% 55% 45% 60%;
+      transform: rotate(-12deg);
+    }
 
-/* TESTIMONIALS */
-.testimonial-wrap{max-width:780px;margin:auto;text-align:center}
-.stars{color:var(--sand);letter-spacing:.2em;margin-bottom:25px}
-.quote{font-family:"Playfair Display",serif;font-size:clamp(28px,4vw,48px);line-height:1.15}
-.testimonial-name{margin-top:25px;color:rgba(255,255,255,.58);font-size:12px}
+    .beach-glow {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(ellipse, rgba(255,239,181,.4), transparent 65%);
+      filter: blur(10px);
+    }
 
-/* FORM */
-.form-section{background:#fff;padding:130px 0}
-.form-layout{display:grid;grid-template-columns:.75fr 1.25fr;gap:70px}
-.form-copy h2{font-size:clamp(44px,5vw,76px);line-height:.95;letter-spacing:-.06em;margin:18px 0}
-.form-copy p{color:var(--muted);line-height:1.7;max-width:380px}
-.contact-note{margin-top:35px;padding-top:20px;border-top:1px solid var(--dark-line);font-size:12px;color:var(--muted)}
-.form{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-.field{position:relative}
-.field.full{grid-column:1/-1}
-.field input,.field select,.field textarea{
-  width:100%;border:1px solid var(--dark-line);background:#FBFAF6;border-radius:15px;
-  padding:18px 15px;outline:none;color:var(--ink);transition:.3s
-}
-.field textarea{min-height:130px;resize:vertical}
-.field label{
-  position:absolute;left:15px;top:18px;font-size:12px;color:var(--muted);pointer-events:none;
-  transition:.25s;background:#FBFAF6;padding:0 3px
-}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ocean-700);box-shadow:0 0 0 4px rgba(8,120,138,.08)}
-.field input:focus+label,.field input:not(:placeholder-shown)+label,
-.field textarea:focus+label,.field textarea:not(:placeholder-shown)+label,
-.field select:focus+label{top:-7px;font-size:10px;color:var(--ocean-700)}
-.form-submit{grid-column:1/-1;display:flex;gap:12px;align-items:center;margin-top:4px}
-.form-message{font-size:12px;color:var(--ocean-700);display:none}
+    /* =========================================================
+       ROTA
+    ========================================================= */
 
-/* FOOTER */
-footer{background:var(--ocean-950);color:#fff;padding:70px 0 28px}
-.footer-top{display:flex;justify-content:space-between;gap:40px;padding-bottom:50px;border-bottom:1px solid rgba(255,255,255,.1)}
-.footer-brand{max-width:430px}.footer-brand h2{font-size:36px;letter-spacing:-.04em;margin-bottom:14px}
-.footer-brand p{font-size:13px;color:rgba(255,255,255,.55);line-height:1.7}
-.footer-links{display:flex;gap:70px}.footer-links div{display:flex;flex-direction:column;gap:12px;font-size:12px;color:rgba(255,255,255,.62)}
-.footer-links strong{color:#fff;margin-bottom:5px}
-.footer-bottom{display:flex;justify-content:space-between;padding-top:22px;font-size:10px;color:rgba(255,255,255,.4)}
+    .route-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
 
-/* REVEAL */
-.reveal{opacity:0;transform:translateY(35px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1)}
-.reveal.visible{opacity:1;transform:none}
+    #routeSvg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
 
-/* RESPONSIVE */
-@media(max-width:900px){
-  .nav-links{display:none}
-  .hero h1{font-size:clamp(54px,14vw,92px)}
-  .hero-content{padding-top:25vh}
-  .voyage{height:520vh}
-  .voyage-copy{left:5%;top:11%;width:90%}
-  .voyage-copy h2{font-size:48px}
-  .route-panel{left:5%;right:auto;bottom:7%;width:90%}
-  .route-line{left:10%;right:10%;top:63%}
-  .boat-label{top:63%}
-  .info-grid,.form-layout{grid-template-columns:1fr}
-  .destination-grid{grid-template-columns:1fr 1fr}
-  .benefits{grid-template-columns:1fr 1fr}
-  .plans{grid-template-columns:1fr}
-  .plan.featured{transform:none}
-  .section-head{display:block}
-  .section-head p{margin-top:18px}
-  .footer-top{display:block}
-  .footer-links{margin-top:35px;gap:40px}
-}
-@media(max-width:560px){
-  .container{width:min(100% - 30px,1180px)}
-  .hero-meta{width:calc(100% - 30px)}
-  .trust{display:none}
-  .hero-content{padding-top:22vh}
-  .hero h1{font-size:56px}
-  .hero p{font-size:14px}
-  .boat-hint{display:none}
-  .boat-image{width:190px}.hero-boat{left:57%;top:33%}
-  #voyageBoat{width:170px}.voyage-wake{width:210px;height:120px}
-  .destination-grid{grid-template-columns:1fr}
-  .destination{height:300px}
-  .benefits{grid-template-columns:1fr}
-  .info-list{grid-template-columns:1fr}
-  .form{grid-template-columns:1fr}
-  .field.full{grid-column:auto}
-  .form-submit{grid-column:auto;display:block}
-  .form-submit .btn{width:100%}
-  .footer-links{display:grid;grid-template-columns:1fr 1fr}
-  .footer-bottom{display:block}.footer-bottom span{display:block;margin-top:7px}
-}
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}
-}
-</style>
+    .route-shadow,
+    .route-base,
+    .route-progress {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .route-shadow {
+      stroke: rgba(0,46,66,.25);
+      stroke-width: 11;
+    }
+
+    .route-base {
+      stroke: rgba(255,255,255,.28);
+      stroke-width: 5;
+    }
+
+    .route-progress {
+      stroke: #fff;
+      stroke-width: 5;
+      filter: drop-shadow(0 0 7px rgba(255,255,255,.55));
+    }
+
+    /* =========================================================
+       BARCO REAL
+    ========================================================= */
+
+    .boat {
+      position: absolute;
+      left: 0;
+      top: 0;
+
+      /*
+        A imagem é vertical.
+        190px de altura dá presença no mobile
+        sem dominar a tela.
+      */
+      width: auto;
+      height: 190px;
+
+      z-index: 20;
+      transform-origin: 50% 50%;
+      will-change: transform;
+
+      filter:
+        drop-shadow(0 15px 13px rgba(0,30,45,.42))
+        drop-shadow(0 2px 5px rgba(255,255,255,.30));
+    }
+
+    .boat-image {
+      display: block;
+      width: auto;
+      height: 100%;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+
+    .boat-wake {
+      position: absolute;
+      width: 105px;
+      height: 34px;
+      left: 50%;
+      top: 87%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background:
+        radial-gradient(
+          ellipse,
+          rgba(255,255,255,.46),
+          rgba(255,255,255,.12) 45%,
+          transparent 72%
+        );
+      filter: blur(8px);
+      opacity: .6;
+      z-index: -1;
+    }
+
+    /* =========================================================
+       UI
+    ========================================================= */
+
+    .ui {
+      position: absolute;
+      inset: 0;
+      z-index: 40;
+      pointer-events: none;
+    }
+
+    .topbar {
+      position: absolute;
+      top: max(20px, env(safe-area-inset-top));
+      left: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand,
+    .progress-pill {
+      background: rgba(5,30,43,.35);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.16);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 13px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .brand-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 10px #fff;
+    }
+
+    .progress-pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .story {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: max(36px, env(safe-area-inset-bottom));
+      max-width: 390px;
+    }
+
+    .story-card {
+      padding: 20px;
+      border-radius: 24px;
+      background: rgba(3,27,40,.38);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 20px 70px rgba(0,0,0,.18);
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 9px;
+      color: rgba(255,255,255,.75);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow-line {
+      width: 22px;
+      height: 1px;
+      background: rgba(255,255,255,.65);
+    }
+
+    .story h1 {
+      margin: 0;
+      font-size: clamp(30px,8vw,48px);
+      line-height: .95;
+      letter-spacing: -.055em;
+      font-weight: 700;
+    }
+
+    .story p {
+      margin: 12px 0 0;
+      color: rgba(255,255,255,.75);
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 320px;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: rgba(255,255,255,.7);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      transition: opacity .3s;
+    }
+
+    .scroll-wheel {
+      width: 20px;
+      height: 30px;
+      border: 1px solid rgba(255,255,255,.6);
+      border-radius: 999px;
+      position: relative;
+    }
+
+    .scroll-wheel::after {
+      content: "";
+      position: absolute;
+      width: 3px;
+      height: 6px;
+      left: 50%;
+      top: 6px;
+      transform: translateX(-50%);
+      border-radius: 99px;
+      background: #fff;
+      animation: scrollDot 1.5s infinite;
+    }
+
+    @keyframes scrollDot {
+      0% { transform: translate(-50%,0); opacity: 1; }
+      80% { transform: translate(-50%,10px); opacity: 0; }
+      100% { opacity: 0; }
+    }
+
+    /* =========================================================
+       MARCADORES
+    ========================================================= */
+
+    .marker {
+      position: absolute;
+      z-index: 15;
+      transform: translate(-50%,-50%);
+      pointer-events: none;
+    }
+
+    .marker-dot {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #fff;
+      border: 4px solid rgba(3,66,88,.45);
+      box-shadow: 0 0 0 5px rgba(255,255,255,.15);
+    }
+
+    .marker-label {
+      position: absolute;
+      left: 23px;
+      top: -6px;
+      white-space: nowrap;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(4,32,46,.6);
+      border: 1px solid rgba(255,255,255,.15);
+      backdrop-filter: blur(12px);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    /* =========================================================
+       CTA FINAL
+    ========================================================= */
+
+    .final-cta {
+      position: absolute;
+      inset: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      background: linear-gradient(
+        to bottom,
+        rgba(3,27,40,0),
+        rgba(3,27,40,.7)
+      );
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .final-content {
+      max-width: 390px;
+    }
+
+    .final-content span {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.7);
+    }
+
+    .final-content h2 {
+      margin: 12px 0;
+      font-size: clamp(42px,11vw,72px);
+      line-height: .9;
+      letter-spacing: -.06em;
+    }
+
+    .final-content p {
+      margin: 0 auto 22px;
+      max-width: 300px;
+      color: rgba(255,255,255,.75);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 25px;
+      border-radius: 999px;
+      background: #fff;
+      color: #063148;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 15px 45px rgba(0,0,0,.25);
+      pointer-events: auto;
+    }
+
+    @media (min-width: 768px) {
+      .story {
+        left: 50px;
+        bottom: 50px;
+      }
+
+      .topbar {
+        left: 40px;
+        right: 40px;
+      }
+
+      .boat {
+        height: 240px;
+      }
+
+      .story-card {
+        padding: 24px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<div class="noise"></div>
 
-<header id="header">
-  <div class="container nav">
-    <a href="#" class="logo">UBATUBA<span> / NÁUTICA</span></a>
-    <nav class="nav-links">
-      <a href="#roteiro">Roteiros</a>
-      <a href="#experiencias">Experiências</a>
-      <a href="#planos">Planos</a>
-      <a href="#contato">Contato</a>
-    </nav>
-    <a href="#contato" class="nav-cta">Reservar passeio ↗</a>
-  </div>
-</header>
+<main class="journey" id="journey">
 
-<main>
-  <section class="hero" id="inicio">
-    <div class="hero-ocean"></div>
-    <div class="boat-wake" aria-hidden="true"></div><img class="boat-image hero-boat" src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20260%20620%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22h%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%236e3f20%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23b8743a%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235a321c%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22d%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23f6ead2%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23caa979%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M130%208%20C83%2052%2057%20126%2050%20238%20L37%20500%20C34%20555%2075%20603%20130%20616%20C185%20603%20226%20555%20223%20500%20L210%20238%20C203%20126%20177%2052%20130%208Z%22%20fill%3D%22url(%23h)%22%20stroke%3D%22%233b2416%22%20stroke-width%3D%227%22%2F%3E%3Cpath%20d%3D%22M130%2032%20C98%2079%2082%20143%2077%20239%20L68%20494%20C66%20535%2093%20568%20130%20585%20C167%20568%20194%20535%20192%20494%20L183%20239%20C178%20143%20162%2079%20130%2032Z%22%20fill%3D%22url(%23d)%22%2F%3E%3Crect%20x%3D%2291%22%20y%3D%22174%22%20width%3D%2278%22%20height%3D%22125%22%20rx%3D%2224%22%20fill%3D%22%23315d65%22%20stroke%3D%22%23172f34%22%20stroke-width%3D%226%22%2F%3E%3Crect%20x%3D%22100%22%20y%3D%22187%22%20width%3D%2260%22%20height%3D%2238%22%20rx%3D%2212%22%20fill%3D%22%238ed8d7%22%20opacity%3D%22.8%22%2F%3E%3Crect%20x%3D%22100%22%20y%3D%22239%22%20width%3D%2260%22%20height%3D%2248%22%20rx%3D%2212%22%20fill%3D%22%238ed8d7%22%20opacity%3D%22.65%22%2F%3E%3Cpath%20d%3D%22M82%20334%20H178%22%20stroke%3D%22%2376502f%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M79%20365%20H181%22%20stroke%3D%22%2376502f%22%20stroke-width%3D%229%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M86%20397%20H174%22%20stroke%3D%22%2376502f%22%20stroke-width%3D%229%22%20stroke-linecap%3D%22round%22%2F%3E%3Crect%20x%3D%22101%22%20y%3D%2292%22%20width%3D%2258%22%20height%3D%2255%22%20rx%3D%2215%22%20fill%3D%22%23fff%22%20opacity%3D%22.95%22%20stroke%3D%22%238b6a45%22%20stroke-width%3D%224%22%2F%3E%3Crect%20x%3D%22105%22%20y%3D%22100%22%20width%3D%2250%22%20height%3D%2239%22%20rx%3D%2211%22%20fill%3D%22%23dce9e5%22%2F%3E%3Ccircle%20cx%3D%2293%22%20cy%3D%22153%22%20r%3D%227%22%20fill%3D%22%23fff%22%2F%3E%3Ccircle%20cx%3D%22167%22%20cy%3D%22153%22%20r%3D%227%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M111%2054%20L149%2054%22%20stroke%3D%22%23fff%22%20stroke-width%3D%228%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M130%2054%20V20%22%20stroke%3D%22%23fff%22%20stroke-width%3D%225%22%2F%3E%3Cpath%20d%3D%22M130%2015%20L121%2029%20H139Z%22%20fill%3D%22%23e7d4b0%22%2F%3E%3Cpath%20d%3D%22M89%20467%20H171%22%20stroke%3D%22%23fff%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.75%22%2F%3E%3Ccircle%20cx%3D%2289%22%20cy%3D%22443%22%20r%3D%227%22%20fill%3D%22%23263f42%22%2F%3E%3Ccircle%20cx%3D%22171%22%20cy%3D%22443%22%20r%3D%227%22%20fill%3D%22%23263f42%22%2F%3E%3C%2Fsvg%3E" alt="Escuna vista de cima navegando pelo mar de Ubatuba">
-    <div class="boat-hint">Vista aérea • experiência 3D</div>
+  <section class="viewport">
 
-    <div class="container hero-content">
-      <div class="hero-copy reveal">
-        <div class="eyebrow">Ubatuba · São Paulo</div>
-        <h1>Uma viagem que <em>começa</em> no scroll.</h1>
-        <p>Descubra ilhas, praias e águas cristalinas em uma experiência pelo litoral de Ubatuba a bordo de uma escuna ou lancha.</p>
-        <div class="actions">
-          <a class="btn btn-primary" href="#contato">Reservar meu passeio <span>↗</span></a>
-          <a class="btn btn-ghost" href="#roteiro">Explorar roteiros <span>↓</span></a>
-        </div>
+    <!-- =======================================================
+         CÂMERA
+    ======================================================== -->
+
+    <div class="map-camera" id="camera">
+
+      <div class="ocean"></div>
+      <div class="water-texture"></div>
+      <div class="depth"></div>
+
+      <div class="land island-1">
+        <div class="beach-glow"></div>
       </div>
+
+      <div class="land island-2">
+        <div class="beach-glow"></div>
+      </div>
+
+      <div class="land island-3">
+        <div class="beach-glow"></div>
+      </div>
+
+      <!-- =====================================================
+           ROTA
+      ====================================================== -->
+
+      <div class="route-layer">
+
+        <svg
+          id="routeSvg"
+          viewBox="0 0 1000 1000"
+          preserveAspectRatio="none"
+        >
+
+          <path
+            class="route-shadow"
+            d="
+              M 120 760
+              C 180 710, 205 625, 290 610
+              C 375 595, 395 690, 470 640
+              C 550 585, 510 480, 590 440
+              C 670 400, 730 455, 760 370
+              C 795 275, 700 210, 770 145
+            "
+          />
+
+          <path
+            class="route-base"
+            d="
+              M 120 760
+              C 180 710, 205 625, 290 610
+              C 375 595, 395 690, 470 640
+              C 550 585, 510 480, 590 440
+              C 670 400, 730 455, 760 370
+              C 795 275, 700 210, 770 145
+            "
+          />
+
+          <path
+            id="routeProgress"
+            class="route-progress"
+            d="
+              M 120 760
+              C 180 710, 205 625, 290 610
+              C 375 595, 395 690, 470 640
+              C 550 585, 510 480, 590 440
+              C 670 400, 730 455, 760 370
+              C 795 275, 700 210, 770 145
+            "
+          />
+
+        </svg>
+
+        <!-- =====================================================
+             PONTOS DE INTERESSE
+        ====================================================== -->
+
+        <div class="marker" data-progress="0" style="left:12%;top:76%">
+          <div class="marker-dot"></div>
+          <div class="marker-label">Partida</div>
+        </div>
+
+        <div class="marker" data-progress=".27" style="left:29%;top:61%">
+          <div class="marker-dot"></div>
+          <div class="marker-label">Baía Azul</div>
+        </div>
+
+        <div class="marker" data-progress=".56" style="left:59%;top:44%">
+          <div class="marker-dot"></div>
+          <div class="marker-label">Ilha Verde</div>
+        </div>
+
+        <div class="marker" data-progress=".79" style="left:76%;top:37%">
+          <div class="marker-dot"></div>
+          <div class="marker-label">Praia Secreta</div>
+        </div>
+
+        <div class="marker" data-progress="1" style="left:77%;top:14.5%">
+          <div class="marker-dot"></div>
+          <div class="marker-label">Destino</div>
+        </div>
+
+      </div>
+
+      <!-- =====================================================
+           SEU BARCO REAL
+      ====================================================== -->
+
+      <div class="boat" id="boat">
+
+        <div class="boat-wake"></div>
+
+        <img
+          src="barco-real-transparente.png"
+          class="boat-image"
+          alt="Iate visto de cima"
+          draggable="false"
+        >
+
+      </div>
+
     </div>
 
-    <div class="hero-meta">
-      <div class="trust">
-        <div class="avatar-stack"><i class="avatar"></i><i class="avatar"></i><i class="avatar"></i></div>
-        Experiências reais · atendimento personalizado
-      </div>
-      <div class="scroll-cue"><i></i> Role para navegar</div>
-    </div>
-  </section>
+    <!-- =======================================================
+         INTERFACE
+    ======================================================== -->
 
-  <section class="voyage" id="roteiro">
-    <div class="ocean-stage">
-      <div class="voyage-wake" id="voyageWake" aria-hidden="true"></div><img id="voyageBoat" src="data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20260%20620%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22h%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%236e3f20%22%2F%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23b8743a%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%235a321c%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22d%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23f6ead2%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23caa979%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M130%208%20C83%2052%2057%20126%2050%20238%20L37%20500%20C34%20555%2075%20603%20130%20616%20C185%20603%20226%20555%20223%20500%20L210%20238%20C203%20126%20177%2052%20130%208Z%22%20fill%3D%22url(%23h)%22%20stroke%3D%22%233b2416%22%20stroke-width%3D%227%22%2F%3E%3Cpath%20d%3D%22M130%2032%20C98%2079%2082%20143%2077%20239%20L68%20494%20C66%20535%2093%20568%20130%20585%20C167%20568%20194%20535%20192%20494%20L183%20239%20C178%20143%20162%2079%20130%2032Z%22%20fill%3D%22url(%23d)%22%2F%3E%3Crect%20x%3D%2291%22%20y%3D%22174%22%20width%3D%2278%22%20height%3D%22125%22%20rx%3D%2224%22%20fill%3D%22%23315d65%22%20stroke%3D%22%23172f34%22%20stroke-width%3D%226%22%2F%3E%3Crect%20x%3D%22100%22%20y%3D%22187%22%20width%3D%2260%22%20height%3D%2238%22%20rx%3D%2212%22%20fill%3D%22%238ed8d7%22%20opacity%3D%22.8%22%2F%3E%3Crect%20x%3D%22100%22%20y%3D%22239%22%20width%3D%2260%22%20height%3D%2248%22%20rx%3D%2212%22%20fill%3D%22%238ed8d7%22%20opacity%3D%22.65%22%2F%3E%3Cpath%20d%3D%22M82%20334%20H178%22%20stroke%3D%22%2376502f%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M79%20365%20H181%22%20stroke%3D%22%2376502f%22%20stroke-width%3D%229%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M86%20397%20H174%22%20stroke%3D%22%2376502f%22%20stroke-width%3D%229%22%20stroke-linecap%3D%22round%22%2F%3E%3Crect%20x%3D%22101%22%20y%3D%2292%22%20width%3D%2258%22%20height%3D%2255%22%20rx%3D%2215%22%20fill%3D%22%23fff%22%20opacity%3D%22.95%22%20stroke%3D%22%238b6a45%22%20stroke-width%3D%224%22%2F%3E%3Crect%20x%3D%22105%22%20y%3D%22100%22%20width%3D%2250%22%20height%3D%2239%22%20rx%3D%2211%22%20fill%3D%22%23dce9e5%22%2F%3E%3Ccircle%20cx%3D%2293%22%20cy%3D%22153%22%20r%3D%227%22%20fill%3D%22%23fff%22%2F%3E%3Ccircle%20cx%3D%22167%22%20cy%3D%22153%22%20r%3D%227%22%20fill%3D%22%23fff%22%2F%3E%3Cpath%20d%3D%22M111%2054%20L149%2054%22%20stroke%3D%22%23fff%22%20stroke-width%3D%228%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M130%2054%20V20%22%20stroke%3D%22%23fff%22%20stroke-width%3D%225%22%2F%3E%3Cpath%20d%3D%22M130%2015%20L121%2029%20H139Z%22%20fill%3D%22%23e7d4b0%22%2F%3E%3Cpath%20d%3D%22M89%20467%20H171%22%20stroke%3D%22%23fff%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.75%22%2F%3E%3Ccircle%20cx%3D%2289%22%20cy%3D%22443%22%20r%3D%227%22%20fill%3D%22%23263f42%22%2F%3E%3Ccircle%20cx%3D%22171%22%20cy%3D%22443%22%20r%3D%227%22%20fill%3D%22%23263f42%22%2F%3E%3C%2Fsvg%3E" alt="Escuna vista de cima navegando pelos roteiros de Ubatuba">
-      <div class="route-line"><div class="route-progress" id="routeProgress"></div></div>
-      <div class="route-marker m1"><span>Roteiro 01</span></div>
-      <div class="route-marker m2"><span>Roteiro 02</span></div>
-      <div class="route-marker m3"><span>Roteiro 03</span></div>
-      <div class="route-marker m4"><span>Roteiro 04</span></div>
+    <div class="ui">
 
-      <div class="voyage-copy" id="voyageCopy">
-        <div class="route-counter" id="routeCounter">Roteiro 01 · 04</div>
-        <h2 id="routeTitle">Seu primeiro encontro com o litoral de Ubatuba.</h2>
-        <p id="routeDescription">O mar vira caminho. A cada parada, uma nova paisagem, uma nova água para mergulhar e um novo motivo para esquecer a rotina.</p>
-      </div>
+      <div class="topbar">
 
-      <div class="route-panel" id="routePanel">
-        <h3 id="panelTitle">Primeira parada</h3>
-        <p id="panelDescription">Embarque, navegue e deixe o litoral conduzir o seu dia.</p>
-        <div class="route-facts">
-          <div class="fact"><small>Check-in</small><strong id="checkin">08:30 · Embarque</strong></div>
-          <div class="fact"><small>Check-out</small><strong id="checkout">13:30 · Retorno</strong></div>
-          <div class="fact"><small>Duração</small><strong id="duration">Até 5 horas</strong></div>
-          <div class="fact"><small>Embarcação</small><strong id="boatType">Escuna / Lancha</strong></div>
+        <div class="brand">
+          <span class="brand-dot"></span>
+          Mar Aberto
         </div>
-        <div class="route-steps" id="routeSteps">
-          <span>Ilha</span><span>Praia</span><span>Banho</span><span>Retorno</span>
-        </div>
-      </div>
-      <div class="boat-label" id="boatLabel">Navegando por Ubatuba</div>
-    </div>
-  </section>
 
-  <section class="light-section" id="experiencias">
-    <div class="container">
-      <div class="section-head reveal">
-        <div>
-          <div class="eyebrow" style="color:var(--ocean-700)">Roteiro 01</div>
-          <h2>Planeje o dia. O mar cuida do resto.</h2>
+        <div class="progress-pill">
+          <span id="progressText">0%</span>
         </div>
-        <p>Informações claras para você embarcar tranquilo e aproveitar cada minuto da experiência.</p>
+
       </div>
 
-      <div class="info-grid">
-        <article class="info-card feature reveal">
-          <div class="eyebrow">A experiência</div>
-          <h3>Seu primeiro encontro com o litoral.</h3>
-          <p>Uma rota pensada para combinar navegação, banho de mar e paradas em cenários que só fazem sentido quando vistos da água.</p>
-          <div class="info-list">
-            <div><small>Check-in</small><strong>Local e horário combinados</strong></div>
-            <div><small>Check-out</small><strong>Retorno ao ponto de embarque</strong></div>
-            <div><small>Duração</small><strong>Consulte o roteiro</strong></div>
-            <div><small>Reserva</small><strong>Atendimento pelo WhatsApp</strong></div>
+      <div class="story">
+
+        <div class="story-card">
+
+          <div class="eyebrow">
+            <span class="eyebrow-line"></span>
+            <span id="storyEyebrow">Sua viagem começa</span>
           </div>
-        </article>
 
-        <article class="info-card reveal">
-          <div class="eyebrow" style="color:var(--ocean-700)">O que levar</div>
-          <h3>Leve o essencial.</h3>
-          <p>Para curtir o passeio com conforto, recomendamos:</p>
-          <div class="info-list" style="margin-top:20px">
-            <div><small>01</small><strong>Protetor solar</strong></div>
-            <div><small>02</small><strong>Toalha</strong></div>
-            <div><small>03</small><strong>Roupa de banho</strong></div>
-            <div><small>04</small><strong>Óculos de sol</strong></div>
-            <div><small>05</small><strong>Boné ou chapéu</strong></div>
-            <div><small>06</small><strong>Água</strong></div>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
+          <h1 id="storyTitle">
+            Vamos navegar.
+          </h1>
 
-  <section class="light-section" style="padding-top:30px">
-    <div class="container">
-      <div class="section-head reveal">
-        <div>
-          <div class="eyebrow" style="color:var(--ocean-700)">Paradas</div>
-          <h2>Os lugares que você vai descobrir.</h2>
+          <p id="storyDescription">
+            Deslize para descobrir o caminho.
+          </p>
+
         </div>
-        <p>Substitua os destinos abaixo pelos quatro pontos reais de cada roteiro.</p>
+
       </div>
 
-      <div class="destination-grid">
-        <article class="destination reveal"><div class="dest-wave"></div><div class="dest-content"><span class="dest-number">01 · ILHA</span><h3>Ilha do Prumirim</h3><p>Águas tranquilas, natureza e uma parada para sentir Ubatuba de outro ângulo.</p></div></article>
-        <article class="destination reveal"><div class="dest-wave"></div><div class="dest-content"><span class="dest-number">02 · ILHA</span><h3>Ilha das Couves</h3><p>Um dos cenários mais desejados do litoral norte de São Paulo.</p></div></article>
-        <article class="destination reveal"><div class="dest-wave"></div><div class="dest-content"><span class="dest-number">03 · PRAIA</span><h3>Ubatumirim</h3><p>Uma parada para contemplar, nadar e desacelerar.</p></div></article>
-        <article class="destination reveal"><div class="dest-wave"></div><div class="dest-content"><span class="dest-number">04 · ILHA</span><h3>Ilha Anchieta</h3><p>Natureza preservada e paisagens marcantes em uma experiência pelo mar.</p></div></article>
+      <div class="scroll-indicator" id="scrollIndicator">
+        <div class="scroll-wheel"></div>
+        <span>Deslize</span>
       </div>
+
     </div>
+
+    <!-- =======================================================
+         CTA FINAL
+    ======================================================== -->
+
+    <div class="final-cta" id="finalCta">
+
+      <div class="final-content">
+
+        <span>Você chegou</span>
+
+        <h2>
+          O mar<br>
+          espera.
+        </h2>
+
+        <p>
+          Transforme essa rota em uma experiência real.
+          Escolha seu próximo passeio.
+        </p>
+
+        <a href="#reservar" class="cta">
+          Reservar passeio
+        </a>
+
+      </div>
+
+    </div>
+
   </section>
 
-  <section class="light-section" style="padding-top:50px">
-    <div class="container">
-      <div class="section-head reveal">
-        <div>
-          <div class="eyebrow" style="color:var(--ocean-700)">Por que navegar?</div>
-          <h2>Mais do que um passeio. Uma memória para levar.</h2>
-        </div>
-      </div>
-      <div class="benefits">
-        <article class="benefit reveal"><div class="benefit-icon">◌</div><h3>Segurança</h3><p>Experiência e cuidado durante toda a navegação.</p></article>
-        <article class="benefit reveal"><div class="benefit-icon">≈</div><h3>Conforto</h3><p>Uma experiência pensada para você aproveitar cada momento.</p></article>
-        <article class="benefit reveal"><div class="benefit-icon">✦</div><h3>Experiência</h3><p>Roteiros cuidadosamente escolhidos para descobrir Ubatuba.</p></article>
-        <article class="benefit reveal"><div class="benefit-icon">⌁</div><h3>Natureza</h3><p>O melhor do litoral, visto de um lugar que a estrada não alcança.</p></article>
-      </div>
-    </div>
-  </section>
-
-  <section class="light-section" id="planos">
-    <div class="container">
-      <div class="section-head reveal">
-        <div>
-          <div class="eyebrow" style="color:var(--ocean-700)">Experiências</div>
-          <h2>Escolha como quer viver Ubatuba.</h2>
-        </div>
-        <p>Valores e detalhes são exemplos. Edite facilmente no código conforme seus roteiros reais.</p>
-      </div>
-      <div class="plans">
-        <article class="plan reveal">
-          <small>Plano 01</small><h3>Passeio Essencial</h3><p>Uma experiência completa para conhecer o litoral com praticidade.</p>
-          <div class="price">R$ 130 <span>/ pessoa</span></div>
-          <ul><li>Roteiro selecionado</li><li>Até 5 horas</li><li>Paradas para banho</li><li>Atendimento via WhatsApp</li></ul>
-          <a href="#contato" class="btn btn-primary">Quero reservar ↗</a>
-        </article>
-        <article class="plan featured reveal">
-          <span class="plan-badge">MAIS ESCOLHIDO</span>
-          <small>Plano 02</small><h3>Experiência Premium</h3><p>Mais tempo, mais liberdade e uma experiência desenhada para aproveitar.</p>
-          <div class="price">R$ 150 <span>/ pessoa</span></div>
-          <ul><li>Roteiro premium</li><li>Lancha ou escuna</li><li>Paradas selecionadas</li><li>Suporte para reserva</li></ul>
-          <a href="#contato" class="btn btn-primary">Reservar experiência ↗</a>
-        </article>
-        <article class="plan reveal">
-          <small>Plano 03</small><h3>Experiência Exclusiva</h3><p>Para quem quer privacidade e flexibilidade durante a navegação.</p>
-          <div class="price">Sob consulta</div>
-          <ul><li>Lancha privativa</li><li>Roteiro personalizado</li><li>Horário sob consulta</li><li>Experiência exclusiva</li></ul>
-          <a href="#contato" class="btn btn-primary">Solicitar orçamento ↗</a>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="light-section instagram">
-    <div class="container">
-      <div class="section-head reveal">
-        <div><div class="eyebrow" style="color:var(--ocean-700)">Instagram</div><h2>Ubatuba do nosso jeito.</h2></div>
-        <p>Momentos reais de quem já viveu essa experiência.</p>
-      </div>
-    </div>
-    <div class="marquee" aria-label="Galeria de experiências">
-      <div class="insta-card"><div class="insta-orb"></div><span>Mar aberto · Ubatuba</span></div>
-      <div class="insta-card"><div class="insta-orb"></div><span>Dia de ilha · SP</span></div>
-      <div class="insta-card"><div class="insta-orb"></div><span>Águas cristalinas</span></div>
-      <div class="insta-card"><div class="insta-orb"></div><span>Navegação · 01</span></div>
-      <div class="insta-card"><div class="insta-orb"></div><span>Entre praias</span></div>
-      <div class="insta-card"><div class="insta-orb"></div><span>Experiência náutica</span></div>
-      <div class="insta-card"><div class="insta-orb"></div><span>Mar aberto · Ubatuba</span></div>
-      <div class="insta-card"><div class="insta-orb"></div><span>Dia de ilha · SP</span></div>
-      <div class="insta-card"><div class="insta-orb"></div><span>Águas cristalinas</span></div>
-      <div class="insta-card"><div class="insta-orb"></div><span>Navegação · 01</span></div>
-      <div class="insta-card"><div class="insta-orb"></div><span>Entre praias</span></div>
-      <div class="insta-card"><div class="insta-orb"></div><span>Experiência náutica</span></div>
-    </div>
-    <div class="container" style="text-align:center;margin-top:30px"><a href="#" class="btn" style="background:var(--ocean-950);color:#fff">Ver Instagram ↗</a></div>
-  </section>
-
-  <section class="dark-section">
-    <div class="container testimonial-wrap">
-      <div class="eyebrow" style="justify-content:center;color:#BDEBE8">Depoimentos</div>
-      <div class="stars" style="margin-top:22px">★★★★★</div>
-      <div class="quote" id="quote">“A sensação foi de descobrir um lugar novo mesmo estando tão perto de casa.”</div>
-      <div class="testimonial-name" id="quoteName">Marina · Roteiro Ilhas</div>
-    </div>
-  </section>
-
-  <section class="form-section" id="contato">
-    <div class="container form-layout">
-      <div class="form-copy reveal">
-        <div class="eyebrow" style="color:var(--ocean-700)">Reservas</div>
-        <h2>Seu próximo passeio começa aqui.</h2>
-        <p>Conte para nós como você quer viver Ubatuba. Nossa equipe pode ajudar a encontrar o roteiro e a embarcação mais adequados.</p>
-        <div class="contact-note">Atendimento personalizado · Ubatuba, SP<br>Resposta pelo WhatsApp após o envio.</div>
-      </div>
-
-      <form class="form reveal" id="bookingForm">
-        <div class="field"><input id="name" name="name" placeholder=" " required><label for="name">Nome</label></div>
-        <div class="field"><input id="phone" name="phone" placeholder=" " required><label for="phone">WhatsApp</label></div>
-        <div class="field"><input id="email" name="email" type="email" placeholder=" "><label for="email">E-mail</label></div>
-        <div class="field"><input id="date" name="date" type="date" placeholder=" "><label for="date">Data desejada</label></div>
-        <div class="field"><input id="people" name="people" type="number" min="1" placeholder=" "><label for="people">Número de pessoas</label></div>
-        <div class="field"><select id="boat" name="boat"><option value="" selected disabled>Tipo de embarcação</option><option>Escuna</option><option>Lancha</option><option>Indiferente</option></select></div>
-        <div class="field full"><select id="route" name="route"><option value="" selected disabled>Roteiro desejado</option><option>Roteiro 01</option><option>Roteiro 02</option><option>Roteiro 03</option><option>Roteiro 04</option><option>Ainda não sei</option></select></div>
-        <div class="field full"><textarea id="message" name="message" placeholder=" "></textarea><label for="message">Mensagem</label></div>
-        <div class="form-submit">
-          <button class="btn btn-primary" type="submit">Solicitar minha reserva ↗</button>
-          <a href="#" class="btn" id="whatsDirect" style="border:1px solid var(--dark-line)">Reservar pelo WhatsApp</a>
-          <span class="form-message" id="formMessage">Solicitação preparada com sucesso.</span>
-        </div>
-      </form>
-    </div>
-  </section>
 </main>
 
-<footer>
-  <div class="container">
-    <div class="footer-top">
-      <div class="footer-brand">
-        <div class="logo">UBATUBA<span> / NÁUTICA</span></div>
-        <h2>O litoral começa no mar.</h2>
-        <p>Experiências de escuna e lancha pelo litoral de Ubatuba, São Paulo.</p>
-      </div>
-      <div class="footer-links">
-        <div><strong>Explorar</strong><a href="#roteiro">Roteiros</a><a href="#planos">Experiências</a><a href="#contato">Reservas</a></div>
-        <div><strong>Contato</strong><a href="#">WhatsApp</a><a href="#">Instagram</a><a href="#">Ubatuba · SP</a></div>
-      </div>
-    </div>
-    <div class="footer-bottom"><span>© 2026 Ubatuba Náutica</span><span>Uma viagem que começa no scroll.</span></div>
-  </div>
-</footer>
-
 <script>
-/* ==========================================================
-   3D BOAT — feito somente com Three.js, sem modelo externo.
-   Isso mantém o HTML independente de arquivos GLB.
-   ========================================================== */
 
-/* ==========================================================
-   TOP-DOWN BOAT ANIMATION
-   The boat is a transparent 2D image, animated with CSS/JS.
-   ========================================================== */
-const voyageBoat=document.getElementById("voyageBoat");
-const voyageWake=document.getElementById("voyageWake");
-function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
-function ease(v){return v<.5?4*v*v*v:1-Math.pow(-2*v+2,3)/2}
+  /* ==========================================================
+     CONFIGURAÇÃO DA EXPERIÊNCIA
+  ========================================================== */
 
-/* ==========================================================
-   SCROLL STORYTELLING
-   The voyage section is 430vh. Progress controls the boat.
-   ========================================================== */
-const voyage=document.querySelector(".voyage");
-const routeProgress=document.getElementById("routeProgress");
-const routeCounter=document.getElementById("routeCounter");
-const routeTitle=document.getElementById("routeTitle");
-const routeDescription=document.getElementById("routeDescription");
-const panelTitle=document.getElementById("panelTitle");
-const panelDescription=document.getElementById("panelDescription");
-const checkin=document.getElementById("checkin");
-const checkout=document.getElementById("checkout");
-const duration=document.getElementById("duration");
-const boatType=document.getElementById("boatType");
-const routeSteps=document.getElementById("routeSteps");
-const boatLabel=document.getElementById("boatLabel");
+  const EXPERIENCE = {
 
-const routes=[
-  {
-    title:"Seu primeiro encontro com o litoral de Ubatuba.",
-    desc:"O mar vira caminho. A cada parada, uma nova paisagem, uma nova água para mergulhar e um novo motivo para esquecer a rotina.",
-    panel:"Primeira parada",
-    panelDesc:"Embarque, navegue e deixe o litoral conduzir o seu dia.",
-    check:"08:30 · Embarque",out:"13:30 · Retorno",dur:"Até 5 horas",type:"Escuna / Lancha",
-    steps:["Ilha","Praia","Banho","Retorno"]
-  },
-  {
-    title:"Entre ilhas e praias.",
-    desc:"Uma rota para quem quer sentir a mudança de paisagem a cada milha, alternando mar aberto, águas tranquilas e paradas para banho.",
-    panel:"Roteiro 02",
-    panelDesc:"Mais uma etapa da viagem. O barco segue e o horizonte muda.",
-    check:"09:00 · Embarque",out:"14:00 · Retorno",dur:"Até 5 horas",type:"Lancha",
-    steps:["Ilha","Enseada","Banho","Vista"]
-  },
-  {
-    title:"Um dia longe da rotina.",
-    desc:"Desacelere. Aqui, o relógio perde importância e o som das ondas vira a trilha sonora do passeio.",
-    panel:"Roteiro 03",
-    panelDesc:"Uma experiência para aproveitar sem pressa.",
-    check:"08:30 · Embarque",out:"15:00 · Retorno",dur:"Até 6 horas",type:"Escuna",
-    steps:["Praia","Ilha","Mergulho","Almoço"]
-  },
-  {
-    title:"Ubatuba vista de outro ângulo.",
-    desc:"A última etapa leva a viagem para um novo horizonte. É quando você percebe que o destino era também o caminho.",
-    panel:"Roteiro 04",
-    panelDesc:"Chegamos ao último ponto. A viagem continua na memória.",
-    check:"Horário sob consulta",out:"Retorno combinado",dur:"Personalizado",type:"Lancha privativa",
-    steps:["Ilha","Mar aberto","Pôr do sol","Retorno"]
+    boat: {
+      image: "barco-real-transparente.png",
+      heightMobile: 190,
+      heightDesktop: 240
+    },
+
+    stories: [
+
+      {
+        start: 0,
+        end: .10,
+        eyebrow: "Sua viagem começa",
+        title: "Vamos navegar.",
+        description: "Deslize para descobrir o caminho."
+      },
+
+      {
+        start: .10,
+        end: .30,
+        eyebrow: "Primeira parada",
+        title: "Baía Azul.",
+        description: "Águas tranquilas e uma vista que só existe daqui."
+      },
+
+      {
+        start: .30,
+        end: .60,
+        eyebrow: "Pelo caminho",
+        title: "Siga o mar.",
+        description: "A viagem continua por uma rota cercada de natureza."
+      },
+
+      {
+        start: .60,
+        end: .82,
+        eyebrow: "Quase lá",
+        title: "Praia Secreta.",
+        description: "Um pequeno paraíso escondido no caminho."
+      },
+
+      {
+        start: .82,
+        end: .96,
+        eyebrow: "Última parada",
+        title: "Chegamos.",
+        description: "Agora é hora de aproveitar o destino."
+      },
+
+      {
+        start: .96,
+        end: 1,
+        eyebrow: "Experiência completa",
+        title: "O mar espera.",
+        description: "Reserve seu próximo passeio."
+      }
+
+    ]
+
+  };
+
+
+  /* ==========================================================
+     GSAP
+  ========================================================== */
+
+  gsap.registerPlugin(ScrollTrigger);
+
+
+  /* ==========================================================
+     ELEMENTOS
+  ========================================================== */
+
+  const journey = document.querySelector("#journey");
+  const viewport = document.querySelector(".viewport");
+  const camera = document.querySelector("#camera");
+  const routeSvg = document.querySelector("#routeSvg");
+  const route = document.querySelector("#routeProgress");
+  const boat = document.querySelector("#boat");
+
+  const progressText =
+    document.querySelector("#progressText");
+
+  const storyEyebrow =
+    document.querySelector("#storyEyebrow");
+
+  const storyTitle =
+    document.querySelector("#storyTitle");
+
+  const storyDescription =
+    document.querySelector("#storyDescription");
+
+  const storyCard =
+    document.querySelector(".story-card");
+
+  const finalCta =
+    document.querySelector("#finalCta");
+
+  const scrollIndicator =
+    document.querySelector("#scrollIndicator");
+
+  const markers =
+    document.querySelectorAll(".marker");
+
+
+  /* ==========================================================
+     COMPRIMENTO DA ROTA
+  ========================================================== */
+
+  const routeLength = route.getTotalLength();
+
+  route.style.strokeDasharray = routeLength;
+  route.style.strokeDashoffset = routeLength;
+
+
+  /* ==========================================================
+     ESTADO
+  ========================================================== */
+
+  const state = {
+    progress: 0
+  };
+
+  let currentStory = -1;
+
+
+  /* ==========================================================
+     POSICIONAR BARCO
+  ========================================================== */
+
+  function updateBoat(progress) {
+
+    const distance =
+      routeLength * progress;
+
+    const current =
+      route.getPointAtLength(distance);
+
+    const nextDistance =
+      Math.min(
+        routeLength,
+        distance + Math.max(2, routeLength * .001)
+      );
+
+    const next =
+      route.getPointAtLength(nextDistance);
+
+    /*
+      A imagem do barco está com a proa apontando para cima.
+
+      0 graus = para cima.
+      A tangente SVG usa 0 graus = direita.
+
+      Por isso adicionamos 90 graus.
+    */
+
+    const angle =
+      Math.atan2(
+        next.y - current.y,
+        next.x - current.x
+      ) * 180 / Math.PI + 90;
+
+
+    /*
+      O SVG ocupa todo o camera layer.
+      Calculamos a posição do ponto da rota
+      dentro do mesmo sistema visual da câmera.
+    */
+
+    const svgRect =
+      routeSvg.getBoundingClientRect();
+
+    const cameraRect =
+      camera.getBoundingClientRect();
+
+    const pointX =
+      svgRect.left +
+      (current.x / 1000) * svgRect.width;
+
+    const pointY =
+      svgRect.top +
+      (current.y / 1000) * svgRect.height;
+
+    const localX =
+      pointX - cameraRect.left;
+
+    const localY =
+      pointY - cameraRect.top;
+
+
+    /*
+      x/y posicionam o centro do barco exatamente
+      sobre o ponto da rota.
+    */
+
+    const boatWidth =
+      boat.getBoundingClientRect().width;
+
+    const boatHeight =
+      boat.getBoundingClientRect().height;
+
+
+    gsap.set(
+      boat,
+      {
+        x: localX - boatWidth / 2,
+        y: localY - boatHeight / 2,
+        rotation: angle
+      }
+    );
+
   }
-];
 
-let lastRoute=-1;
 
-function updateVoyage(){
-  const rect=voyage.getBoundingClientRect();
-  const max=voyage.offsetHeight-innerHeight;
-  const progress=clamp(-rect.top/max,0,1);
+  /* ==========================================================
+     HISTÓRIA
+  ========================================================== */
 
-  routeProgress.style.width=(progress*100)+"%";
+  function updateStory(progress) {
 
-  // Curved top-down route mapped directly to the viewport.
-  const x=12 + progress*76;
-  const y=56 + Math.sin(progress*Math.PI*1.55)*18;
-  const angle=10 + Math.cos(progress*Math.PI*1.55)*18;
-  const bob=Math.sin(performance.now()*.0024)*3;
-  voyageBoat.style.left=x+"%";
-  voyageBoat.style.top=(y+bob)+"%";
-  voyageBoat.style.transform=`translate(-50%,-50%) rotate(${angle}deg)`;
-  voyageWake.style.left=(x-5)+"%";
-  voyageWake.style.top=(y+2+bob)+"%";
-  voyageWake.style.transform=`translate(-50%,-50%) rotate(${angle-25}deg) scale(${.88+progress*.18})`;
+    let index = 0;
 
-  const routeIndex=Math.min(3,Math.floor(progress*4));
-  const local=(progress*4)-routeIndex;
+    EXPERIENCE.stories.forEach(
+      (story, i) => {
+        if (
+          progress >= story.start &&
+          progress <= story.end
+        ) {
+          index = i;
+        }
+      }
+    );
 
-  if(routeIndex!==lastRoute){
-    lastRoute=routeIndex;
-    const r=routes[routeIndex];
-    routeCounter.textContent=`Roteiro ${String(routeIndex+1).padStart(2,"0")} · 04`;
-    routeTitle.textContent=r.title;
-    routeDescription.textContent=r.desc;
-    panelTitle.textContent=r.panel;
-    panelDescription.textContent=r.panelDesc;
-    checkin.textContent=r.check;
-    checkout.textContent=r.out;
-    duration.textContent=r.dur;
-    boatType.textContent=r.type;
-    routeSteps.innerHTML=r.steps.map(s=>`<span>${s}</span>`).join("");
+    if (index === currentStory) {
+      return;
+    }
+
+    currentStory = index;
+
+    const story =
+      EXPERIENCE.stories[index];
+
+
+    gsap.timeline()
+
+      .to(
+        storyCard,
+        {
+          opacity: 0,
+          y: 10,
+          duration: .14,
+          ease: "power1.out"
+        }
+      )
+
+      .call(() => {
+
+        storyEyebrow.textContent =
+          story.eyebrow;
+
+        storyTitle.textContent =
+          story.title;
+
+        storyDescription.textContent =
+          story.description;
+
+      })
+
+      .to(
+        storyCard,
+        {
+          opacity: 1,
+          y: 0,
+          duration: .28,
+          ease: "power2.out"
+        }
+      );
+
   }
 
-  const copyX=(local<.5?local*2:(1-local)*2)*-10;
-  document.getElementById("voyageCopy").style.transform=`translateX(${copyX}px)`;
-  document.getElementById("voyageCopy").style.opacity=String(.78 + Math.sin(local*Math.PI)*.22);
-  document.getElementById("routePanel").style.transform=`translateY(${Math.sin(local*Math.PI)*-10}px)`;
-  boatLabel.style.opacity=String(.45 + Math.sin(progress*Math.PI)*.45);
-}
-addEventListener("scroll",updateVoyage,{passive:true});
-addEventListener("resize",updateVoyage);
-updateVoyage();
 
-/* Header */
-const header=document.getElementById("header");
-addEventListener("scroll",()=>header.classList.toggle("scrolled",scrollY>50),{passive:true});
+  /* ==========================================================
+     CÂMERA
+  ========================================================== */
 
-/* Reveal on viewport */
-const observer=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add("visible")});
-},{threshold:.12});
-document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
+  function updateCamera(progress) {
 
-/* Testimonial loop */
-const testimonials=[
-  ["“A sensação foi de descobrir um lugar novo mesmo estando tão perto de casa.”","Marina · Roteiro Ilhas"],
-  ["“Tudo foi muito tranquilo. O passeio passou rápido porque a experiência foi incrível.”","Rafael · Experiência Premium"],
-  ["“As paisagens são absurdas. Ver Ubatuba do mar muda completamente a viagem.”","Camila · Roteiro 02"],
-  ["“Atendimento ótimo e um dia que ficou marcado. Já quero voltar.”","Lucas · Lancha Privativa"]
-];
-let ti=0;
-setInterval(()=>{
-  ti=(ti+1)%testimonials.length;
-  const q=document.getElementById("quote"),n=document.getElementById("quoteName");
-  q.style.opacity=0;n.style.opacity=0;
-  setTimeout(()=>{
-    q.textContent=testimonials[ti][0];n.textContent=testimonials[ti][1];
-    q.style.opacity=1;n.style.opacity=1;
-  },300);
-},5000);
+    /*
+      Zoom muito sutil.
+      A intenção é dar sensação de viagem,
+      sem tirar a sensação de mapa.
+    */
 
-/* WhatsApp / form — substitua o número abaixo pelo número real */
-const WHATSAPP="5512999999999";
-function buildWhatsApp(){
-  const data=new FormData(document.getElementById("bookingForm"));
-  const msg=`Olá! Quero solicitar uma reserva.%0A%0ANome: ${encodeURIComponent(data.get("name")||"")}%0AWhatsApp: ${encodeURIComponent(data.get("phone")||"")}%0AData: ${encodeURIComponent(data.get("date")||"")}%0APessoas: ${encodeURIComponent(data.get("people")||"")}%0AEmbarcação: ${encodeURIComponent(data.get("boat")||"")}%0ARoteiro: ${encodeURIComponent(data.get("route")||"")}%0AMensagem: ${encodeURIComponent(data.get("message")||"")}`;
-  return `https://wa.me/${WHATSAPP}?text=${msg}`;
-}
-document.getElementById("whatsDirect").addEventListener("click",e=>{
-  e.preventDefault();
-  window.open(buildWhatsApp(),"_blank");
-});
-document.getElementById("bookingForm").addEventListener("submit",e=>{
-  e.preventDefault();
-  const msg=document.getElementById("formMessage");
-  msg.style.display="inline";
-  msg.textContent="Solicitação preparada. Abrindo o WhatsApp…";
-  setTimeout(()=>window.open(buildWhatsApp(),"_blank"),250);
-});
+    const zoom =
+      1 +
+      Math.sin(progress * Math.PI) * .10;
 
-/* Phone formatting */
-document.getElementById("phone").addEventListener("input",e=>{
-  let v=e.target.value.replace(/\D/g,"").slice(0,11);
-  if(v.length>6)v=v.replace(/^(\d{2})(\d{5})(\d{0,4}).*/,"($1) $2-$3");
-  else if(v.length>2)v=v.replace(/^(\d{2})(\d{0,5}).*/,"($1) $2");
-  e.target.value=v;
-});
+    const panX =
+      -progress * 3;
+
+    const panY =
+      progress * 2;
+
+    gsap.set(
+      camera,
+      {
+        scale: zoom,
+        xPercent: panX,
+        yPercent: panY
+      }
+    );
+
+  }
+
+
+  /* ==========================================================
+     MARCADORES
+  ========================================================== */
+
+  function updateMarkers(progress) {
+
+    markers.forEach(marker => {
+
+      const markerProgress =
+        Number(marker.dataset.progress);
+
+      const distance =
+        Math.abs(
+          progress - markerProgress
+        );
+
+      const opacity =
+        progress >= markerProgress
+          ? 1
+          : .32;
+
+      gsap.to(
+        marker,
+        {
+          opacity: opacity,
+          scale:
+            distance < .025
+              ? 1.12
+              : 1,
+          duration: .2,
+          overwrite: true
+        }
+      );
+
+    });
+
+  }
+
+
+  /* ==========================================================
+     EXPERIÊNCIA PRINCIPAL
+  ========================================================== */
+
+  function updateExperience(progress) {
+
+    progress =
+      Math.max(
+        0,
+        Math.min(
+          1,
+          progress
+        )
+      );
+
+    state.progress = progress;
+
+
+    /*
+      ROTA:
+      0 = nenhuma rota revelada
+      1 = rota inteira revelada
+    */
+
+    route.style.strokeDashoffset =
+      routeLength * (1 - progress);
+
+
+    /*
+      Ordem importante:
+
+      1. câmera
+      2. barco
+
+      Assim o barco é recalculado usando
+      a posição atual da câmera.
+    */
+
+    updateCamera(progress);
+
+    updateBoat(progress);
+
+    updateStory(progress);
+
+    updateMarkers(progress);
+
+
+    progressText.textContent =
+      Math.round(progress * 100) + "%";
+
+
+    gsap.set(
+      scrollIndicator,
+      {
+        opacity:
+          progress > .035
+            ? 0
+            : 1
+      }
+    );
+
+
+    /*
+      CTA aparece somente no final.
+    */
+
+    if (progress > .91) {
+
+      gsap.to(
+        finalCta,
+        {
+          autoAlpha:
+            Math.min(
+              1,
+              (progress - .91) / .07
+            ),
+          duration: .25,
+          overwrite: true
+        }
+      );
+
+    } else {
+
+      gsap.to(
+        finalCta,
+        {
+          autoAlpha: 0,
+          duration: .2,
+          overwrite: true
+        }
+      );
+
+    }
+
+  }
+
+
+  /* ==========================================================
+     SCROLL → PROGRESS 0 → 1
+  ========================================================== */
+
+  ScrollTrigger.create({
+
+    trigger: journey,
+
+    start: "top top",
+
+    end: "bottom bottom",
+
+    scrub: true,
+
+    invalidateOnRefresh: true,
+
+    onUpdate: self => {
+
+      updateExperience(
+        self.progress
+      );
+
+    }
+
+  });
+
+
+  /* ==========================================================
+     RESIZE
+  ========================================================== */
+
+  let resizeTimer;
+
+  window.addEventListener(
+    "resize",
+    () => {
+
+      clearTimeout(resizeTimer);
+
+      resizeTimer =
+        setTimeout(() => {
+
+          ScrollTrigger.refresh();
+
+          updateExperience(
+            state.progress
+          );
+
+        }, 150);
+
+    }
+  );
+
+
+  /* ==========================================================
+     LOAD
+  ========================================================== */
+
+  window.addEventListener(
+    "load",
+    () => {
+
+      ScrollTrigger.refresh();
+
+      requestAnimationFrame(() => {
+        updateExperience(0);
+      });
+
+    }
+  );
+
+
+  /* ==========================================================
+     PRIMEIRO FRAME
+  ========================================================== */
+
+  requestAnimationFrame(() => {
+    updateExperience(0);
+  });
+
 </script>
+
 </body>
 </html>
